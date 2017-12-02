@@ -1,0 +1,43 @@
+Usage:
+    
+    $ curl rate.sx       show exchange rates for the top 10 cryptocurrencies (by market capitalization)
+
+Options:
+
+    ?OPTIONS
+
+    q                  quiet mode, don't show header and footer (github/twitter buttons)
+    T                  text only, no ANSI sequences
+
+Options can be combined together in this way:
+
+    curl cheat.sh/for?qT
+    
+
+Special pages:
+
+    :help              this page
+
+Displayed information:
+
+    [First line]:      total cryptocurrency market capitalization change for the last 4 hours
+    Market cap:        total cryptocurrency market capitalization
+    24h Vol:           the overall trading volume of cryptocurrency market
+    BTC Dominance:     BTC market share (in percent)
+    Top 10 cryptocurrencies sorted by their captilazation
+    Spark:             cryptocurrency price change for the last hour (12 x 5 Min)
+    Timestamp:         UTC time of the last update. Endpoint data is being updated every 5 minutes.
+
+
+DISCLAIMER:
+
+    Though rate.sx synchronizes with online cryptocurrencies exchanges every five minutes,
+    we cannot guarantee absolute accuracy of the displayed exchange rates.
+    You should always confirm current rates before making any transactions
+    that could be affected by changes in the exchange rates.
+    Crypocurrency rates based on the data provided by exchanges APIs.
+    All rates are for information purposes only and are subject to change without prior notice.
+    Since rates for actual transactions may vary,
+    we are not offering to enter into any transaction at any rate displayed.
+    Displayed rates are composite prices and not intended to be used for investment purposes. 
+
