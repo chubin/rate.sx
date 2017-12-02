@@ -1,0 +1,11 @@
+gevent
+flask
+pygments
+requests
+pygments
+dateutils
+redis
+colored
+terminaltables
+colorama
+termdata
