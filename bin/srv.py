@@ -89,8 +89,8 @@ def log_query(ip, topic, user_agent):
     with open(FILE_QUERIES_LOG, 'a') as my_file:
         my_file.write(log_entry.encode('utf-8')+"\n")
 
-@app.route("/", methods=['GET', 'POST'])
-@app.route("/<path:topic>", methods=["GET", "POST"])
+@app.route("/", methods=['GET'])
+@app.route("/<path:topic>", methods=["GET"])
 def answer(topic = None):
     """
     Main rendering function, it processes incoming weather queries.
@@ -121,35 +121,6 @@ def answer(topic = None):
     else:
        ip = request.remote_addr
 
-
-    if request.method == 'POST':
-        for k, v in request.form.items():
-            if k == '':
-                if topic is None:
-                    topic_name = "UNNAMED"
-                else:
-                    topic_name = topic
-                cheatsheet = v
-            else:
-                if v == '':
-                    if topic is None:
-                        topic_name = "UNNAMED"
-                    else:
-                        topic_name = topic
-                    cheatsheet = k
-                else:
-                    topic_name = k
-                    cheatsheet = v
-
-            save_cheatsheet(topic_name, cheatsheet)
-
-        if html_needed:
-            return redirect("/")
-        else:
-            return "OK\n"
-
-    if 'topic' in request.args:
-        return redirect("/%s" % request.args.get('topic'))
 
     if topic is None:
         topic = ":firstpage"

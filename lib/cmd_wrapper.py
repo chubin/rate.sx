@@ -19,6 +19,14 @@ sys.path.append("%s/lib/" % MYDIR)
 from globals import error, ANSI2HTML
 
 from buttons import TWITTER_BUTTON, GITHUB_BUTTON, GITHUB_BUTTON_FOOTER
+
+INTERNAL_TOPICS = [":help"]
+
+def get_internal(topic):
+    if topic in INTERNAL_TOPICS:
+        return open(os.path.join(MYDIR, "share", topic[1:]+".txt"), "r").read()
+
+    return ""
  
 def get_cmd_output(topic):
     cmd = ["/home/igor/rate.sx/bin/cmd", topic]
@@ -49,7 +57,10 @@ def cmd_wrapper(query, request_options=None, html=False):
 
     query = rewrite_aliases(query)
 
-    result = get_cmd_output(query)
+    if query in INTERNAL_TOPICS:
+        result = get_internal(query)
+    else:
+        result = get_cmd_output(query)
 
     if html:
         result = "\n".join(result.splitlines()[:-1])
