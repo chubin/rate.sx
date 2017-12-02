@@ -13,7 +13,7 @@ To get current market capitalization (in USD) of the top ten cryptocoins in shel
 
 To use it in a web browser, just type rate.sx in the location bar.
 
-![rate.sx screenshot](http://cheat.sh/files/screenshot.png)
+![rate.sx screenshot](http://rate.sx/files/screenshot.png)
 
 ## Features
 
