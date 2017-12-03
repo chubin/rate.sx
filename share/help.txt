@@ -11,7 +11,7 @@ Options:
 
 Options can be combined together in this way:
 
-    curl cheat.sh/for?qT
+    curl rate.sx/?qT
     
 
 Special pages:
