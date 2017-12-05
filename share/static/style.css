@@ -4,18 +4,10 @@ body {
 }
 .pre,
 pre {
-/*    font-family: source_code_proregular; */
-
-/*
-font-family: Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;
-font-size: 70%;
-*/
-
-/*font-family: Lucida Console,Lucida Sans Typewriter,monaco,Bitstream Vera Sans Mono,monospace; */
-/*Droid Sans Mono*/
-font-family: "DejaVu Sans Mono", Menlo, "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;
-/*font-family: bitstream_vera_sans_monoroman;*/
-font-size: 75%;
+    /*font-family: "DejaVu Sans Mono", Menlo, "Lucida Sans Typewriter", "Lucida Console", monaco, "Bitstream Vera Sans Mono", monospace;*/
+    font-family: Consolas, Menlo, Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace, serif;
+    font-family: monospace,monospace;
+    font-size: 75%;
 }
 
 input[type="text"]{
