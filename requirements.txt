@@ -9,3 +9,4 @@ colored
 terminaltables
 colorama
 termdata
+PyYAML

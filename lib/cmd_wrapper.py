@@ -16,8 +16,10 @@ import time
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
-from globals import error, ANSI2HTML
+import currencies
+import calculator
 
+from globals import error, ANSI2HTML
 from buttons import TWITTER_BUTTON, GITHUB_BUTTON, GITHUB_BUTTON_FOOTER
 
 INTERNAL_TOPICS = [":help"]
@@ -28,8 +30,24 @@ def get_internal(topic):
 
     return ""
  
-def get_cmd_output(topic):
-    cmd = ["/home/igor/rate.sx/bin/cmd", topic]
+def get_cmd_output(hostname, topic):
+    if hostname == 'rate.sx' and topic == ':firstpage':
+        cmd = ["/home/igor/rate.sx/bin/cmd", topic]
+    else:
+        currency = hostname.lower()
+        if currency.endswith('.rate.sx'):
+            currency = currency[:-8].upper()
+        if currency not in currencies.SUPPORTED_CURRENCIES:
+            currency = 'USD'
+
+        if topic != ':firstpage':
+            answer = calculator.calculate(topic.upper(), currency)
+            if answer is not None:
+                return "%s\n" % answer
+            else:
+                return "ERROR: Can't parse your query: %s\n" % topic
+
+        cmd = ["/home/igor/rate.sx/ve/bin/python", "/home/igor/rate.sx/bin/collect_data_new_curr.py", currency, topic]
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     answer = p.communicate()[0]
     return answer.decode('utf-8')
@@ -40,14 +58,14 @@ def rewrite_aliases(word):
     return word
 
 def html_wrapper(data):
-    p = Popen([ "bash", ANSI2HTML, "--palette=solarized", "--bg=dark" ],  stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p = Popen([ "bash", ANSI2HTML, "--palette=xterm", "--bg=dark" ],  stdin=PIPE, stdout=PIPE, stderr=PIPE)
     data = data.encode('utf-8')
     stdout, stderr = p.communicate(data)
     if p.returncode != 0:
         error(stdout + stderr)
     return stdout.decode('utf-8')
 
-def cmd_wrapper(query, request_options=None, html=False):
+def cmd_wrapper(query, hostname=None, request_options=None, html=False):
 
     # 
     # at the moment, we just remove trailing slashes
@@ -60,7 +78,7 @@ def cmd_wrapper(query, request_options=None, html=False):
     if query in INTERNAL_TOPICS:
         result = get_internal(query)
     else:
-        result = get_cmd_output(query)
+        result = get_cmd_output(hostname, query)
 
     if html:
         result = "\n".join(result.splitlines()[:-1])

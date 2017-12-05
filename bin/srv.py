@@ -19,6 +19,7 @@ import time
 import traceback
 import dateutil.parser
 import json
+import datetime
 
 import jinja2
 from flask import Flask, request, render_template, send_from_directory, send_file, make_response, redirect
@@ -84,8 +85,8 @@ def send_favicon():
 def send_malformed():
     return send_from_directory(STATIC, 'malformed-response.html')
 
-def log_query(ip, topic, user_agent):
-    log_entry = "%s %s %s" % (ip, topic, user_agent)
+def log_query(ip, hostname, topic, user_agent):
+    log_entry = "%s %s %s %s %s" % (datetime.datetime.now(), ip, hostname, topic, user_agent)
     with open(FILE_QUERIES_LOG, 'a') as my_file:
         my_file.write(log_entry.encode('utf-8')+"\n")
 
@@ -107,6 +108,7 @@ def answer(topic = None):
     user_agent = request.headers.get('User-Agent', '').lower()
     html_needed = is_html_needed(user_agent)
     options = parse_args(request.args)
+    hostname = request.headers['Host']
 
     if request.headers.getlist("X-Forwarded-For"):
        ip = request.headers.getlist("X-Forwarded-For")[0]
@@ -125,9 +127,9 @@ def answer(topic = None):
     if topic is None:
         topic = ":firstpage"
 
-    answer = cmd_wrapper(topic, request_options=options, html=is_html_needed(user_agent))
+    answer = cmd_wrapper(topic, hostname=hostname, request_options=options, html=is_html_needed(user_agent))
     
-    log_query(ip, topic, user_agent)
+    log_query(ip, hostname, topic, user_agent)
     return answer
 
 server = WSGIServer(("", 8004), app) # log=None)
