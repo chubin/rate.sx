@@ -1,32 +1,40 @@
 Usage:
     
-    $ curl rate.sx       show exchange rates for the top 10 cryptocurrencies (by market capitalization)
+    $ curl rate.sx      show exchange rates for the top 10 cryptocurrencies (by market capitalization)
+    $ curl eur.rate.sx  show exchange rates in EUR (USD by default; list of the supported currencies below)
 
 Options:
 
     ?OPTIONS
 
-    q                  quiet mode, don't show header and footer (github/twitter buttons)
-    T                  text only, no ANSI sequences
+    q                   quiet mode, don't show header and footer (github/twitter buttons)
+    T                   text only, no ANSI sequences
 
 Options can be combined together in this way:
 
     curl rate.sx/?qT
-    
 
 Special pages:
 
-    :help              this page
+    :help               this page
+
+Supported currencies:
+
+    USD, AUD, CAD, CHF, CNY, EUR, GBP, IDR, JPY, KRW, RUB
+
+    USD is default currency of rate.sx.
+    To get the output in some other currency currency, specify it in the rate.sx query as a subdomain.
+    If the currency is not supported, rate.sx silently falls back to USD.
 
 Displayed information:
 
-    [First line]:      total cryptocurrency market capitalization change for the last 4 hours
-    Market cap:        total cryptocurrency market capitalization
-    24h Vol:           the overall trading volume of cryptocurrency market
-    BTC Dominance:     BTC market share (in percent)
+    [First line]:       total cryptocurrency market capitalization change for the last 4 hours
+    Market cap:         total cryptocurrency market capitalization
+    24h Vol:            the overall trading volume of cryptocurrency market
+    BTC Dominance:      BTC market share (in percent)
     Top 10 cryptocurrencies sorted by their captilazation
-    Spark:             cryptocurrency price change for the last hour (12 x 5 Min)
-    Timestamp:         UTC time of the last update. Endpoint data is being updated every 5 minutes.
+    Spark:              cryptocurrency price change for the last hour (12 x 5 Min)
+    Timestamp:          UTC time of the last update. Endpoint data is being updated every 5 minutes.
 
 
 DISCLAIMER:
