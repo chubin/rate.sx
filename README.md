@@ -11,6 +11,13 @@ To get current market capitalization (in USD) of the top ten cryptocoins in shel
     curl rate.sx
 ```
 
+Or if you want to get the output in some other currency,
+specify it in the domain name (lower-, upper- or mixed-case):
+
+```
+    curl eur.rate.sx
+```
+
 To use it in a web browser, just type rate.sx in the location bar.
 
 ![rate.sx screenshot](http://rate.sx/files/screenshot.png)
@@ -19,6 +26,11 @@ To use it in a web browser, just type rate.sx in the location bar.
 
 * simple curl/browser interface
 * available everywhere, no installation needed
+
+## Supported currencies
+
+You can find actual list of the supported currencies in `/:help`.
+12 different currencies are supported at the moment.
 
 ## Disclaimer
 
