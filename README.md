@@ -44,12 +44,21 @@ Since rates for actual transactions may vary,
 we are not offering to enter into any transaction at any rate displayed.
 Displayed rates are composite prices and not intended to be used for investment purposes. 
 
-## Installation
+## Integration
 
-Though you do not need to install *rate.sx* to use it,
-you can.
+### GNU Emacs
 
-### Install rate.sx
+[rate-sx.el](https://github.com/davep/rate-sx.el) — rate.sx in Emacs (courtesy of Dave Pearson @davep)
+
+![rate-sx.el screenshot](https://user-images.githubusercontent.com/28237/33782065-1569d88e-dc4f-11e7-9547-c9e14dcfd470.png)
+
+## rate.sx Server Installation
+
+If you want install the *rate.sx* server, you can do it. Keep in mind that you need some data 
+datasource. Server without data is useless (of course, you can always
+use rate.sx as the datasource, though the point of such strange configuration is not clear).
+
+### Install rate.sx server
 
 ```
 git clone github.com/chubin/rate.sx
