@@ -1,5 +1,5 @@
 
-*rate.sx* — console serice for getting cryptocurrencies exchange rates
+*rate.sx* — console service for getting cryptocurrencies exchange rates
 
 ## Usage
 
