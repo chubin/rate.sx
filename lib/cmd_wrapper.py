@@ -16,7 +16,7 @@ import time
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
-import currencies
+import currencies_names
 import calculator
 
 from globals import error, ANSI2HTML
@@ -38,8 +38,8 @@ def get_cmd_output(hostname, topic):
         currency = hostname.lower()
         if currency.endswith('.rate.sx'):
             currency = currency[:-8].upper()
-        if currency not in currencies.SUPPORTED_CURRENCIES \
-            and currency not in currencies.CRYPTO_CURRENCIES:
+        if currency not in currencies_names.SUPPORTED_CURRENCIES \
+            and currency not in currencies_names.CRYPTO_CURRENCIES:
             currency = 'USD'
 
         if topic != ':firstpage':
