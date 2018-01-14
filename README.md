@@ -1,5 +1,5 @@
 
-*rate.sx* — console serice for getting cryptocurrencies exchange rates
+*rate.sx* — console service for getting cryptocurrencies exchange rates
 
 ## Usage
 
@@ -54,9 +54,9 @@ Displayed rates are composite prices and not intended to be used for investment 
 
 ## rate.sx Server Installation
 
-If you want install the *rate.sx* server, you can do it. Keep in mind that you need some data 
-datasource. Server without data is useless (of course, you can always
-use rate.sx as the datasource, though the point of such strange configuration is not clear).
+If you want to install the *rate.sx* server, you can do it. Keep in mind that you need some data 
+datasource. A server without data is useless (of course, you can always
+use rate.sx as the datasource, though the point of such a strange configuration is not clear).
 
 ### Install rate.sx server
 
