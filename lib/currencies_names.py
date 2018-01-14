@@ -49,5 +49,8 @@ SYMBOL = {
     'RUB': '₽'
 }
 
-CRYPTO_CURRENCIES = ['BTC', 'ETH', 'BCH', 'XRP', 'MIOTA', 'DASH', 'LTC', 'BTG', 'XMR']
+CRYPTO_CURRENCIES = [
+    'BTC', 'ETH', 'XRP', 'BCH', 'ADA', 'LTC', 'XEM', 'XLM', 'MIOTA', 'NEO',
+    'EOS', 'DASH', 'XMR', 'TRX', 'BTG', 'ETC', 'ICX', 'QTUM', 'LSK', 'XRB',
+]
 
