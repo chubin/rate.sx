@@ -53,10 +53,13 @@ import requests
 import time
 import calendar
 
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
+sys.path.append("%s/lib/" % MYDIR)
+
 from pymongo import MongoClient
 client = MongoClient()
 
-LOGFILE="/home/igor/rate.sx/log/fetch.log"
+LOGFILE="%s/log/fetch.log" % MYDIR
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     filename=LOGFILE,
