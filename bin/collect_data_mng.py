@@ -47,6 +47,8 @@ symbol and timesatmp are indices.
     }
 """
 
+import sys
+import os
 import json
 import logging
 import requests
