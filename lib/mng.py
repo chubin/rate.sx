@@ -10,7 +10,7 @@ import datetime
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
 
-import currencies
+import currencies_names
 from pymongo import MongoClient
 
 #
@@ -36,7 +36,7 @@ class MongoReader(object):
         self.number_of_ticks = config.get('number_of_ticks', 12)
         self.currency = config.get('currency', 'USD')
 
-        if self.currency in currencies.SUPPORTED_CURRENCIES:
+        if self.currency in currencies_names.SUPPORTED_CURRENCIES:
             self.is_currency_coin = False
         else:
             self.is_currency_coin = True
@@ -44,32 +44,47 @@ class MongoReader(object):
         self._currency_factor_cache = {}
         self._spark_price_currency_ticks = []
 
-    def currency_factor(self, timestamp):
+    def currency_factor(self, timestamp=None, currency=None):
         """
         Factor that is used to convert value in <self.currency> in USD
         for specified <timestamp>
         """
-        if self.currency == 'USD':
+
+        if currency is None:
+            currency = self.currency
+
+        if currency in currencies_names.SUPPORTED_CURRENCIES:
+            is_currency_coin = False
+        else:
+            is_currency_coin = True
+
+        if currency == 'USD':
             return 1
 
-        if timestamp in self._currency_factor_cache:
-            return self._currency_factor_cache[timestamp]
+        # we use cache only if timestamp is specified
+        if timestamp and (currency, timestamp) in self._currency_factor_cache:
+            return self._currency_factor_cache[(currency, timestamp)]
 
-        if self.is_currency_coin:
+        query = {}
+        if timestamp:
+            query["timestamp"] = {'$lt':timestamp+1}
+
+        if is_currency_coin:
+            query.update({"symbol": currency})
             price_symbol = self.coins\
-                .find({
-                    "symbol": self.currency,
-                    "timestamp":{'$lt':timestamp+1}},
-                      {'price_usd':1}) \
+                .find(query, {'price_usd':1}) \
                 .sort([("timestamp", -1)]) \
                 .limit(1)[0]['price_usd']
         else:
-            price_symbol = self.currencies.find({"timestamp":{'$lt':timestamp+1},
-                                                 self.currency: {'$exists': True}}) \
+            query.update({currency: {'$exists': True}})
+            price_symbol = self.currencies.find(query, {currency:1}) \
                 .sort([("timestamp", -1)]) \
-                .limit(1)[0][self.currency]
+                .limit(1)[0][currency]
 
-        self._currency_factor_cache[timestamp] = 1/price_symbol
+        # we use cache only if timestamp is specified
+        if timestamp:
+            self._currency_factor_cache[(currency, timestamp)] = 1/price_symbol
+
         return 1/price_symbol
 
     def load_spark(self, symbol, timestamp):
@@ -131,7 +146,7 @@ class MongoReader(object):
                       "active_assets",
                       "total_24h_volume_usd"]:
             if field.endswith('_usd'):
-                answer[field] = self.currency_factor(timestamp)*data[field]
+                answer[field] = self.currency_factor(timestamp=timestamp)*data[field]
             else:
                 answer[field] = data[field]
 
@@ -151,8 +166,8 @@ class MongoReader(object):
                 .sort([("timestamp", -1)]) \
                 .limit(1)[0]['price_usd']
 
-            price_before = price_before*self.currency_factor(timestamp-timedelta)
-            price = price_usd*self.currency_factor(timestamp)
+            price_before = price_before*self.currency_factor(timestamp=timestamp-timedelta)
+            price = price_usd*self.currency_factor(timestamp=timestamp)
 
             return (price-price_before)*100/price_before
 
@@ -168,7 +183,7 @@ class MongoReader(object):
         for entry in self.coins.find({"rank": {"$lt": number_of_coins + 1}, "timestamp":timestamp}):
             entry = {
                 'code': entry['symbol'],
-                'price': entry['price_usd']*self.currency_factor(timestamp),
+                'price': entry['price_usd']*self.currency_factor(timestamp=timestamp),
                 'change_24h': get_change(entry['symbol'], entry['price_usd'], timestamp, 24*3600),
                 'change_1h': get_change(entry['symbol'], entry['price_usd'], timestamp, 3600),
                 'cap': entry['market_cap_usd']*self.currency_factor(timestamp),
