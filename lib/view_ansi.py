@@ -18,7 +18,7 @@ MYDIR = os.path.abspath(os.path.dirname( os.path.dirname('__file__') ))
 sys.path.append("%s/lib/" % MYDIR)
 from to_precision import to_precision
 import spark
-import currencies
+import currencies_names
 
 
 HEADER = r"""
@@ -137,7 +137,7 @@ def print_table(currency, data, directions, marktcap_spark):
 
     market_cap_direction, vol_24h_direction, btc_dominance_direction = directions
 
-    currency_symbol = currencies.SYMBOL.get(currency, '')
+    currency_symbol = currencies_names.SYMBOL.get(currency, '')
     currency_suffix = ''
     if currency_symbol == '':
         currency_suffix = ' ' + currency
