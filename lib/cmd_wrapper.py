@@ -31,13 +31,15 @@ def get_internal(topic):
     return ""
  
 def get_cmd_output(hostname, topic):
-    if hostname == 'rate.sx' and topic == ':firstpage':
-        cmd = ["/home/igor/rate.sx/bin/cmd", topic]
+    cache_file = '%s/data/last' % MYDIR
+    if hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
+        return open(cache_file).read().decode('utf-8')
     else:
         currency = hostname.lower()
         if currency.endswith('.rate.sx'):
             currency = currency[:-8].upper()
-        if currency not in currencies.SUPPORTED_CURRENCIES:
+        if currency not in currencies.SUPPORTED_CURRENCIES \
+            and currency not in currencies.CRYPTO_CURRENCIES:
             currency = 'USD'
 
         if topic != ':firstpage':
