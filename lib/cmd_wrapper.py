@@ -47,7 +47,7 @@ def get_cmd_output(hostname, topic):
             else:
                 return "ERROR: Can't parse your query: %s\n" % topic
 
-        cmd = ["/home/igor/rate.sx/ve/bin/python", "/home/igor/rate.sx/bin/collect_data_new_curr.py", currency, topic]
+        cmd = ["%s/ve/bin/python" % MYDIR, "%s/bin/show_data.py" % MYDIR, currency, topic]
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     answer = p.communicate()[0]
     return answer.decode('utf-8')
