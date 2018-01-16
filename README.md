@@ -18,6 +18,14 @@ specify it in the domain name (lower-, upper- or mixed-case):
     curl eur.rate.sx
 ```
 
+Also, you can use rate.sx in (crypto)currency calculator mode:
+
+```
+    $ curl eur.rate.sx/1BTC+1BCH+1BTG       # to convert sum of the bitcoins into Euro
+    $ curl rub.rate.sx/100ETH               # to convert 100 ETH into Russian ruble
+    $ curl rate.sx/1BTC-10ETH               # to compare what is more: 1 BTC or 10 ETH
+```
+
 To use it in a web browser, just type rate.sx in the location bar.
 
 ![rate.sx screenshot](http://rate.sx/files/screenshot.png)
@@ -27,10 +35,48 @@ To use it in a web browser, just type rate.sx in the location bar.
 * simple curl/browser interface
 * available everywhere, no installation needed
 
-## Supported currencies
+## Supported currencies and cryptocurrencies
 
 You can find actual list of the supported currencies in `/:help`.
-12 different currencies are supported at the moment.
+32 different currencies and 500 most popular crypto currencies are supported at the moment.
+
+## Options
+
+For the list of all supported options see `/:help`:
+
+```
+    $ curl rate.sx/:help
+```
+
+The most important options:
+
+    n=NUMBER            number of cryptocurrencies to show (10 by default)
+
+Options are specified after the ? sign in the URL.
+They can be separated using the `&` sign (don't forget to escape or to quote it in the shell, because
+it is a special shell symbol).
+
+```
+    $ curl btc.rate.sx/?n=30
+```
+
+## Output units
+
+By default, rate.sx shows rates of cryptocurrencies to USD (or any other currency if it is
+specified in the query as show above). It is possible to use a crypto currency as the unit.
+Keep in mind, that in the changes columns (and in the sparklines) difference to the historical
+rates is displayed, and not to the current rate. That is obviously the reason why spark 
+for the rate currency to the same currency is always 1 (and change is 0).
+
+This mode can be used to compare some cryptocurrency with the rest.
+Say, if we want to see, what cryptocurrencies are falling not so fast comparing 
+to BTC (picture is done during the January 2018 correction):
+
+![btc.rate.sx/?n=30](http://rate.sx/files/ratesx-n30.png)
+
+We see here that nothing (except ARDR) from the top 30 (because we use `?n=30` here)
+is falling slower than BTC (USDT is obviously an exception).
+If we would use normal USD/EUR/GBP output, we could not find this out (at least not instantly).
 
 ## Disclaimer
 
