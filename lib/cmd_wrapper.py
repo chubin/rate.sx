@@ -19,6 +19,8 @@ sys.path.append("%s/lib/" % MYDIR)
 import currencies_names
 import calculator
 
+import view
+
 from globals import error, ANSI2HTML
 from buttons import TWITTER_BUTTON, GITHUB_BUTTON, GITHUB_BUTTON_FOOTER
 
@@ -30,7 +32,7 @@ def get_internal(topic):
 
     return ""
  
-def get_cmd_output(hostname, topic):
+def get_cmd_output(hostname, topic, request_options):
     cache_file = '%s/data/last' % MYDIR
     if hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
         return open(cache_file).read().decode('utf-8')
@@ -38,8 +40,12 @@ def get_cmd_output(hostname, topic):
         currency = hostname.lower()
         if currency.endswith('.rate.sx'):
             currency = currency[:-8].upper()
+
+        if currency == 'COIN':
+            return "Use YOUR COIN instead of COIN in the query: for example btg.rate.sx, xvg.rate.sx, eth.rate.sx and so on\nTry:\n curl btg.rate.sx\n curl xvg.rate.sx\n curl xrb.rate.sx\n"
+
         if currency not in currencies_names.SUPPORTED_CURRENCIES \
-            and currency not in currencies_names.CRYPTO_CURRENCIES:
+            and currency not in currencies_names.CRYPTO_CURRENCIES + ['coin']:
             currency = 'USD'
 
         if topic != ':firstpage':
@@ -50,8 +56,12 @@ def get_cmd_output(hostname, topic):
                 return "ERROR: Can't parse your query: %s\n" % topic
 
         cmd = ["%s/ve/bin/python" % MYDIR, "%s/bin/show_data.py" % MYDIR, currency, topic]
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    answer = p.communicate()[0]
+
+    config = request_options
+    config['currency'] = currency
+    answer = view.show(config)
+    #p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    #answer = p.communicate()[0]
     return answer.decode('utf-8')
 
 def rewrite_aliases(word):
@@ -80,7 +90,7 @@ def cmd_wrapper(query, hostname=None, request_options=None, html=False):
     if query in INTERNAL_TOPICS:
         result = get_internal(query)
     else:
-        result = get_cmd_output(hostname, query)
+        result = get_cmd_output(hostname, query, request_options)
 
     if html:
         result = "\n".join(result.splitlines()[:-1])
