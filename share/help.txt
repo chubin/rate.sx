@@ -2,6 +2,13 @@ Usage:
     
     $ curl rate.sx      show exchange rates for the top 10 cryptocurrencies (by market capitalization)
     $ curl eur.rate.sx  show exchange rates in EUR (USD by default; list of the supported currencies below)
+    $ curl btc.rate.sx  show exchange rates in BTC (you can use any of the top 500 cryptocurrencies here)
+
+Or in the cryptocurrency calculator mode:
+
+    $ curl eur.rate.sx/1BTC+1BCH+1BTG       # to convert sum of the bitcoins into Euro
+    $ curl rub.rate.sx/100ETH               # to convert 100 ETH into Russian ruble
+    $ curl rate.sx/1BTC-10ETH               # to compare what is more: 1 BTC or 10 ETH
 
 Options:
 
@@ -9,10 +16,12 @@ Options:
 
     q                   quiet mode, don't show header and footer (github/twitter buttons)
     T                   text only, no ANSI sequences
+    n=NUMBER            number of cryptocurrencies to show (10 by default)
 
 Options can be combined together in this way:
 
     curl rate.sx/?qT
+    curl 'rate.sx/?qT&n=20'     # quotes are used here because of & in the url (you can use \& instead)
 
 Special pages:
 
