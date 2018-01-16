@@ -28,6 +28,12 @@ app = Flask(__name__)
 MYDIR = os.path.abspath(os.path.dirname( os.path.dirname('__file__') ))
 sys.path.append("%s/lib/" % MYDIR)
 
+# crazy clients that send queries to oft
+# it is ok, but we wont log them
+SKIP_LOGGING_FOR_THIS_IPS = set([
+    '89.212.19.164',
+])
+
 from globals import FILE_QUERIES_LOG, LOG_FILE, TEMPLATES, STATIC, log, error
 
 from cmd_wrapper import cmd_wrapper
@@ -129,7 +135,8 @@ def answer(topic = None):
 
     answer = cmd_wrapper(topic, hostname=hostname, request_options=options, html=is_html_needed(user_agent))
     
-    log_query(ip, hostname, topic, user_agent)
+    if ip not in SKIP_LOGGING_FOR_THIS_IPS:
+        log_query(ip, hostname, topic, user_agent)
     return answer
 
 server = WSGIServer(("", 8004), app) # log=None)
