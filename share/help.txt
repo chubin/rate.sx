@@ -26,10 +26,13 @@ Options can be combined together in this way:
 Special pages:
 
     :help               this page
+    :currencies         list of supported currencies with their full names
+    :coins              list of supported cryptocurrencies with their full names
 
 Supported currencies:
 
-    USD, AUD, CAD, CHF, CNY, EUR, GBP, IDR, JPY, KRW, RUB
+    USD, AUD, CAD, CHF, CNY, EUR, GBP, IDR, JPY, KRW, RUB and many other.
+    List of supported currencies can be found on rate.sx/:currencies
 
     USD is default currency of rate.sx.
     To get the output in some other currency currency, specify it in the rate.sx query as a subdomain.

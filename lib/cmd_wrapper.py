@@ -13,6 +13,8 @@ import random
 import string
 import collections
 import time
+import json
+import hashlib
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
@@ -20,22 +22,43 @@ import currencies_names
 import calculator
 
 import view
+import coins_names
 
 from globals import error, ANSI2HTML
 from buttons import TWITTER_BUTTON, GITHUB_BUTTON, GITHUB_BUTTON_FOOTER
 
-INTERNAL_TOPICS = [":help"]
+INTERNAL_TOPICS = [":help", ":currencies", ":coins"]
+
+def show_currencies():
+    return "\n".join(["%-6s %s" % (x, currencies_names.CURRENCY_NAME[x]) for x in currencies_names.SUPPORTED_CURRENCIES]) + "\n"
+
+def show_coins():
+    return "\n".join(["%-6s %s" % (x,y) for (x,y) in coins_names.COIN_NAMES]) + "\n"
 
 def get_internal(topic):
+    if topic == ':currencies':
+        return show_currencies()
+
+    if topic == ':coins':
+        return show_coins()
+
     if topic in INTERNAL_TOPICS:
         return open(os.path.join(MYDIR, "share", topic[1:]+".txt"), "r").read()
 
     return ""
+
+def get_digest(data):
+    return hashlib.sha1(json.dumps(data, sort_keys=True)).hexdigest()
  
 def get_cmd_output(hostname, topic, request_options):
-    cache_file = '%s/data/last' % MYDIR
-    if hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
+
+    digest = get_digest({'h':hostname, 't': topic, 'r': request_options})
+
+    cache_file = '%s/cache/%s' % (MYDIR, digest)
+    if os.path.exists(cache_file):
         return open(cache_file).read().decode('utf-8')
+    #elif hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
+    #    return open(cache_file).read().decode('utf-8')
     else:
         currency = hostname.lower()
         if currency.endswith('.rate.sx'):
@@ -51,6 +74,7 @@ def get_cmd_output(hostname, topic, request_options):
         if topic != ':firstpage':
             answer = calculator.calculate(topic.upper(), currency)
             if answer is not None:
+                open(cache_file, 'w').write(str(answer)+"\n")
                 return "%s\n" % answer
             else:
                 return "ERROR: Can't parse your query: %s\n" % topic
@@ -60,6 +84,8 @@ def get_cmd_output(hostname, topic, request_options):
     config = request_options
     config['currency'] = currency
     answer = view.show(config)
+
+    open(cache_file, 'w').write(answer)
     #p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     #answer = p.communicate()[0]
     return answer.decode('utf-8')

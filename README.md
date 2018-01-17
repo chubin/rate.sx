@@ -37,7 +37,7 @@ To use it in a web browser, just type rate.sx in the location bar.
 
 ## Supported currencies and cryptocurrencies
 
-You can find actual list of the supported currencies in `/:help`.
+You can find actual list of the supported currencies in `/:currencies` and cryptocurrencies in `/:coins`.
 32 different currencies and 500 most popular crypto currencies are supported at the moment.
 
 ## Options
