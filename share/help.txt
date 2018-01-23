@@ -35,7 +35,7 @@ Supported currencies:
     List of supported currencies can be found on rate.sx/:currencies
 
     USD is default currency of rate.sx.
-    To get the output in some other currency currency, specify it in the rate.sx query as a subdomain.
+    To get the output in some other currency, specify it in the rate.sx query as a subdomain.
     If the currency is not supported, rate.sx silently falls back to USD.
 
 Displayed information:
