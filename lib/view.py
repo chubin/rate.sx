@@ -39,9 +39,16 @@ def show(config):
     market_cap_direction, vol_24h_direction, btc_dominance_direction = 0, 0, 0
     marktcap_spark = "."*48
 
-    return print_table(
-                config['currency'],
-                data,
-                (market_cap_direction, vol_24h_direction, btc_dominance_direction),
-                marktcap_spark)
+    try:
+        output = print_table(
+                    config['currency'],
+                    data,
+                    (market_cap_direction, vol_24h_direction, btc_dominance_direction),
+                    marktcap_spark)
+
+    except ValueError, e:
+        output = "ERROR: %s" % s
+
+    return output
+        
 

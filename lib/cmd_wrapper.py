@@ -72,7 +72,11 @@ def get_cmd_output(hostname, topic, request_options):
             currency = 'USD'
 
         if topic != ':firstpage':
-            answer = calculator.calculate(topic.upper(), currency)
+            try:
+                answer = calculator.calculate(topic.upper(), currency)
+            except ValueError, e:
+                return "ERROR: %s\n" % e
+
             if answer is not None:
                 open(cache_file, 'w').write(str(answer)+"\n")
                 return "%s\n" % answer

@@ -71,15 +71,21 @@ class MongoReader(object):
 
         if is_currency_coin:
             query.update({"symbol": currency})
-            price_symbol = self.coins\
-                .find(query, {'price_usd':1}) \
-                .sort([("timestamp", -1)]) \
-                .limit(1)[0]['price_usd']
+            try:
+                price_symbol = self.coins\
+                    .find(query, {'price_usd':1}) \
+                    .sort([("timestamp", -1)]) \
+                    .limit(1)[0]['price_usd']
+            except IndexError:
+                raise ValueError("Unknown coin/currency: %s" % currency)
         else:
             query.update({currency: {'$exists': True}})
-            price_symbol = self.currencies.find(query, {currency:1}) \
-                .sort([("timestamp", -1)]) \
-                .limit(1)[0][currency]
+            try:
+                price_symbol = self.currencies.find(query, {currency:1}) \
+                    .sort([("timestamp", -1)]) \
+                    .limit(1)[0][currency]
+            except IndexError:
+                raise ValueError("Unknown currency: %s" % currency)
 
         # we use cache only if timestamp is specified
         if timestamp:
