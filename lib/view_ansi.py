@@ -86,8 +86,12 @@ def colorize_entries(entries):
         cap = entry['cap']
         s_spark = spark.spark(entry['spark'])
 
-        change_24h = colorize_number("%.2f%%" % change_24h)
-        change_1h = colorize_number("%.2f%%" % change_1h)
+        if change_24h != '-':
+            change_24h = colorize_number("%.2f%%" % change_24h)
+
+        if change_1h != '-':
+            change_1h = colorize_number("%.2f%%" % change_1h)
+
         code = colored(code, 'cyan')
         price = colored(to_precision(price, 6), 'cyan')
         cap = human_format(cap)

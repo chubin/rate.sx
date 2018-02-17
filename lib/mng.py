@@ -187,13 +187,43 @@ class MongoReader(object):
 
         data = []
         for entry in self.coins.find({"rank": {"$lt": number_of_coins + 1}, "timestamp":timestamp}):
+            try:
+                symbol = entry['symbol']
+            except:
+                symbol = '-'
+
+            try:
+                price = entry['price_usd']*self.currency_factor(timestamp=timestamp)
+            except:
+                price = '-'
+
+            try:
+                change_24h = get_change(entry['symbol'], entry['price_usd'], timestamp, 24*3600)
+            except:
+                change_24h = '-'
+
+            try:
+                change_1h = get_change(entry['symbol'], entry['price_usd'], timestamp, 3600)
+            except:
+                change_1h = '-'
+
+            try:
+                cap = entry['market_cap_usd']*self.currency_factor(timestamp)
+            except:
+                cap = '-'
+
+            try:
+                spark = self.load_spark(entry['symbol'], timestamp)
+            except:
+                spark = '-'
+
             entry = {
-                'code': entry['symbol'],
-                'price': entry['price_usd']*self.currency_factor(timestamp=timestamp),
-                'change_24h': get_change(entry['symbol'], entry['price_usd'], timestamp, 24*3600),
-                'change_1h': get_change(entry['symbol'], entry['price_usd'], timestamp, 3600),
-                'cap': entry['market_cap_usd']*self.currency_factor(timestamp),
-                'spark': self.load_spark(entry['symbol'], timestamp),
+                'code': symbol,
+                'price': price,
+                'change_24h': change_24h,
+                'change_1h': change_1h,
+                'cap': cap,
+                'spark': spark,
             }
             data.append(entry)
 
