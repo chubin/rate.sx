@@ -19,7 +19,7 @@ sys.path.append("%s/lib/" % MYDIR)
 from to_precision import to_precision
 import spark
 import currencies_names
-
+from ansi_utils import colorize_number, colorize_direction
 
 HEADER = r"""
                                                             X          _               Y
@@ -49,27 +49,6 @@ def human_format(num):
         num /= 1000.0
     # add more suffixes if you need them
     return '%.3f%s' % (num, ['', 'K', 'M', 'B', 'T', 'Q'][magnitude])
-
-def colorize_number(number):
-    """
-    If number is negative make it red, otherwise green
-    """
-    if number.startswith('-'):
-        return colored(number, 'red')
-    else:
-        return colored(number, 'green')
-
-def colorize_direction(direction):
-    """
-    Green for the up direction,
-    gray for the same, and red for the down direction
-    """
-    if direction == 1:
-        return Fore.GREEN + '↑' + Style.RESET_ALL
-    elif direction == -1:
-        return Fore.RED + '↓' + Style.RESET_ALL
-    else:
-        return Style.DIM + '=' + Style.RESET_ALL
 
 def colorize_entries(entries):
     """
