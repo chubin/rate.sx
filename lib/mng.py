@@ -6,18 +6,20 @@ Exports MonfoReader
 import sys
 import os
 import datetime
+from pymongo import MongoClient
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
 
+# pylint: disable=wrong-import-position
 import currencies_names
-from pymongo import MongoClient
+# pylint: enable=wrong-import-position
 
 #
 # functions that fetch needed data from mongodb
 #
 
-class MongoReader(object):
+class MongoReader(object):  # pylint: disable=too-many-instance-attributes
     """
     MongDB client
     """
@@ -189,32 +191,32 @@ class MongoReader(object):
         for entry in self.coins.find({"rank": {"$lt": number_of_coins + 1}, "timestamp":timestamp}):
             try:
                 symbol = entry['symbol']
-            except:
+            except KeyError:
                 symbol = '-'
 
             try:
                 price = entry['price_usd']*self.currency_factor(timestamp=timestamp)
-            except:
+            except KeyError:
                 price = '-'
 
             try:
                 change_24h = get_change(entry['symbol'], entry['price_usd'], timestamp, 24*3600)
-            except:
+            except KeyError:
                 change_24h = '-'
 
             try:
                 change_1h = get_change(entry['symbol'], entry['price_usd'], timestamp, 3600)
-            except:
+            except KeyError:
                 change_1h = '-'
 
             try:
                 cap = entry['market_cap_usd']*self.currency_factor(timestamp)
-            except:
+            except KeyError:
                 cap = '-'
 
             try:
                 spark = self.load_spark(entry['symbol'], timestamp)
-            except:
+            except KeyError:
                 spark = '-'
 
             entry = {
@@ -241,4 +243,81 @@ class MongoReader(object):
             'timestamp_now': "%s UTC" % datetime.datetime.utcnow(),
         }
 
+    def get_raw_data(self, coin, start_time, stop_time, collection_name=None):
+        """
+        Load raw _coin_ data from _start_time_ (>=) to _stop_time_ (<)
+        """
 
+        if collection_name:
+            coins = self.client.ratesx[collection_name]
+        else:
+            coins = self.coins
+
+        query = {
+            'symbol':   coin,
+            'timestamp': {'$gt': start_time - 1, '$lt': stop_time},
+        }
+        sort_key = [("timestamp", 1)]
+        data = [x for x in coins.find(query).sort(sort_key)]
+        return data
+
+    def get_first_timestamp(self, coin, last=False, collection_name=None):
+        """
+        First timestamp for _coin_ in database.
+        """
+
+        if collection_name:
+            coins = self.client.ratesx[collection_name]
+        else:
+            coins = self.coins
+
+        query = {
+            'symbol':   coin,
+        }
+        if last:
+            sort_key = [("timestamp", -1)]
+        else:
+            sort_key = [("timestamp", 1)]
+        data = [x for x in coins.find(query).sort(sort_key).limit(1)]
+        if data != []:
+            return data[0]['timestamp']
+        return None
+
+class MongoWriter(object):
+    """
+    MongoDB writer client.
+    Provides insert() for data writing.
+    """
+
+    def __init__(self):
+
+        self.client = MongoClient()
+
+        ratesx_db = self.client.ratesx
+        self.coins = ratesx_db.coins
+        self.marketcap = ratesx_db.marketcap
+        self.currencies = ratesx_db.currencies
+
+        self.allowed_collections = ['coins_1h', 'coins_24']
+
+    def _get_collection(self, collection_name=None):
+        if collection_name:
+            if collection_name in self.allowed_collections:
+                coins = self.client.ratesx[collection_name]
+            else:
+                raise KeyError("Not allowed collection name")
+        else:
+            coins = self.coins
+        return coins
+
+    def update(self, entry, collection_name=None):
+        "coll.replace_one() wrapper"
+
+        coins = self._get_collection(collection_name)
+        coins.replace_one({'symbol':entry['symbol'], 'timestamp':entry['timestamp']}, entry, True)
+
+    def insert_many(self, entries, collection_name=None):
+        "coll.insertMany() wrapper"
+
+        coins = self._get_collection(collection_name)
+        coins.insertMany(entries)
