@@ -2,7 +2,6 @@ gevent
 flask
 pygments
 requests
-pygments
 dateutils
 redis
 colored
