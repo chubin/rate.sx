@@ -33,7 +33,7 @@ def show_currencies():
     return "\n".join(["%-6s %s" % (x, currencies_names.CURRENCY_NAME[x]) for x in currencies_names.SUPPORTED_CURRENCIES]) + "\n"
 
 def show_coins():
-    return "\n".join(["%-6s %s" % (x,y) for (x,y) in coins_names.COIN_NAMES]) + "\n"
+    return "\n".join(["%-6s %s" % (x,y) for (x,y) in coins_names.COINS_NAMES]) + "\n"
 
 def get_internal(topic):
     if topic == ':currencies':

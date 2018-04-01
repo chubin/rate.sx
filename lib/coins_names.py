@@ -1,4 +1,8 @@
-COIN_NAMES = (
+"""
+  Coins codes and names.
+"""
+
+COINS_NAMES = (
     ("BTC", "Bitcoin"),
     ("ETH", "Ethereum"),
     ("XRP", "Ripple"),
@@ -19,6 +23,7 @@ COIN_NAMES = (
     ("ICX", "ICON"),
     ("LSK", "Lisk"),
     ("XRB", "RaiBlocks"),
+    ("NANO", "Nano"),
     ("OMG", "OmiseGO"),
     ("STRAT", "Stratis"),
     ("ARDR", "Ardor"),
@@ -1000,3 +1005,11 @@ COIN_NAMES = (
     ("BUN", "BunnyCoin"),
     ("JNS", "Janus"),
 )
+
+def coin_name(symbol):
+    """
+    Return full name of the coin ``symbol``
+    """
+
+    coin_name_dict = dict(COINS_NAMES)
+    return coin_name_dict.get(symbol, "")
