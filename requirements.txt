@@ -10,3 +10,5 @@ terminaltables
 colorama
 termdata
 PyYAML
+dateparser
+pylint
