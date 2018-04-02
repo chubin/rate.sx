@@ -8,18 +8,25 @@ import sys
 import os
 import locale
 
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-
-from terminaltables import WindowsTable, PorcelainTable, GithubFlavoredMarkdownTable, SingleTable, DoubleTable
-from colorama import Fore, Back, Style 
+from terminaltables import WindowsTable
+# Other useful tables:
+#  GithubFlavoredMarkdownTable, SingleTable, DoubleTable, PorcelainTable
+from colorama import Fore, Style
 from termcolor import colored
 
-MYDIR = os.path.abspath(os.path.dirname( os.path.dirname('__file__') ))
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
+
+# pylint: disable=wrong-import-position
 from to_precision import to_precision
 import spark
 import currencies_names
 from ansi_utils import colorize_number, colorize_direction
+from globals import MSG_FOLLOW_ME, MSG_NEW_FEATURE, MSG_GITHUB_BUTTON
+# pylint: enable=wrong-import-position
+
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
 
 HEADER = r"""
                                                             X          _               Y
@@ -29,11 +36,6 @@ __ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZX__________|_| \__,_|\__\___()
  '           '           '           '           '                                           """
 
 HEADER = HEADER.replace('X', '\033[33m').replace('Y', '\033[32m')
-
-FOLLOW_ME = '[Follow \033[46m\033[30m@igor_chubin\033[0m for updates]' + Style.RESET_ALL
-FOLLOW_ME = Fore.CYAN + '[Follow @igor_chubin for rate.sx updates]' + Style.RESET_ALL
-NEW_FEATURE = 'See ' + Fore.GREEN + 'rate.sx/:help' + Style.RESET_ALL + ' for help and disclaimer'
-GITHUB_BUTTON = ' ' + '\033[100;30m' + '[github.com/chubin/rate.sx]' + Style.RESET_ALL
 
 #
 # visualzation functions
@@ -50,7 +52,7 @@ def human_format(num):
     # add more suffixes if you need them
     return '%.3f%s' % (num, ['', 'K', 'M', 'B', 'T', 'Q'][magnitude])
 
-def colorize_entries(entries):
+def _colorize_entries(entries):
     """
     Colorize table <entries>
     """
@@ -79,7 +81,7 @@ def colorize_entries(entries):
 
     return data
 
-def colorize_frame(s_frame):
+def _colorize_frame(s_frame):
     """
     Colorize frame in string s_frame
     """
@@ -113,7 +115,7 @@ def colorize_frame(s_frame):
 # that's everything we need to save (and to load later)
 #
 
-def print_table(currency, data, directions, marktcap_spark):
+def print_table(currency, data, directions, marktcap_spark): # pylint: disable=too-many-locals
     """
     Generate main table. Use specified <currency> as the main unit.
     """
@@ -154,7 +156,7 @@ def print_table(currency, data, directions, marktcap_spark):
     table_class = WindowsTable
     table = table_class(
         [[colored(x, 'yellow') for x in header]]
-        + colorize_entries(data['data']))
+        + _colorize_entries(data['data']))
     table.inner_row_border = True
 
     header = HEADER.replace('Z'*48, marktcap_spark)
@@ -163,12 +165,10 @@ def print_table(currency, data, directions, marktcap_spark):
     output += [colored("\n".join(header.splitlines()[1:]) + "\n", 'green')]
     output += ["Market Cap: %s\n24h Vol: %s\nBTC Dominance: %s" \
                 % (market_cap, vol_24h, btc_dominance)]
-    output += [colorize_frame(table.table)]
+    output += [_colorize_frame(table.table)]
     output += [Fore.WHITE + Style.DIM + "%s" % data['timestamp_now']  + Style.RESET_ALL]
     output += [""]
-    output += [NEW_FEATURE]
-    output += [FOLLOW_ME + GITHUB_BUTTON]
+    output += [MSG_NEW_FEATURE]
+    output += [MSG_FOLLOW_ME + MSG_GITHUB_BUTTON]
 
     return "\n".join(output) + "\n"
-
-
