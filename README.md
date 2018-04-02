@@ -1,5 +1,5 @@
 
-*rate.sx* — console service for getting cryptocurrencies exchange rates
+*rate.sx* — console service for exploring (crypto)currencies exchange rates
 
 ## Features
 
@@ -11,13 +11,11 @@
 
 ## Usage
 
-You can access the service from a shell or from a Web browser.
-
 To get information about current exchange rates and market capitalization
 of the top ten cryptocoins in shell:
 
 ```
-    curl rate.sx
+  $ curl rate.sx
 ```
 
 ![rate.sx screenshot](http://rate.sx/files/screenshot.png)
@@ -26,7 +24,7 @@ By default, all rates are represented in USD.
 To use some other currency, specify it in the domain name (lower-, upper- or mixed-case):
 
 ```
-    curl eur.rate.sx
+  $ curl eur.rate.sx
 ```
 
 Also, you can use rate.sx as *(crypto)currency converter/calculator*.
@@ -36,15 +34,15 @@ you have to specify the amount in the query line, after `rate.sx/`.
 For example, to convert 10 Bitcoins (BTC) into US Dollars do:
 
 ```
-    curl rate.sx/10BTC
+  $ curl rate.sx/10BTC
 ```
 
 You can also combine different currencies and cryptocurrencies in the same query:
 
 ```
-    curl eur.rate.sx/1BTC+1BCH+1BTG       # convert sum of the Bitcoins (BTC, BCH and BTG) into Euro (EUR)
-    curl rub.rate.sx/100ETH               # convert 100 ETH into Russian ruble (RUB)
-    curl rate.sx/1BTC-10ETH               # compare what is more: 1 BTC or 10 ETH
+  $ curl eur.rate.sx/1BTC+1BCH+1BTG       # convert sum of the Bitcoins (BTC, BCH and BTG) into Euro (EUR)
+  $ curl rub.rate.sx/100ETH               # convert 100 ETH into Russian ruble (RUB)
+  $ curl rate.sx/1BTC-10ETH               # compare what is more: 1 BTC or 10 ETH
 ```
 
 To show how cryptocurrency exchange rate was changing in time, 
@@ -53,7 +51,7 @@ specify name of the cryptocurrency in the URL.
 For example, for Ethereum (ETH):
 
 ```
-    curl rate.sx/eth
+  $ curl rate.sx/eth
 ```
 
 By default, data for the last 24 hours is displayed, but you can specify
@@ -65,9 +63,9 @@ To display output in some other currency (USD is used by default) or to compare 
 with another cryptocurrency, specify it in the domain name or after `/` in the query:
 
 ```
-    curl rate.sx/eth@30d                # Ethereum to USD rate for the last 30 days
-    curl eur.rate.sx/btc@february       # How Bitcoin (BTC) price in EUR changed in February
-    curl xlm.rate.sx/xrp@01-Feb-2018..  # Is it true that 1 XRP (Ripple coin) since Feb 1 costs 3 XLM (Stellar)?
+  $ curl rate.sx/eth@30d                # Ethereum to USD rate for the last 30 days
+  $ curl eur.rate.sx/btc@february       # How Bitcoin (BTC) price in EUR changed in February
+  $ curl xlm.rate.sx/xrp@01-Feb-2018..  # Is it true that 1 XRP (Ripple) costs 3 XLM (Stellar) since Feb 1?
 ```
 
 The time interval can be specified in many various ways. Though, most of them are intuitively clear,
@@ -87,7 +85,7 @@ You can find actual list of the supported currencies in `/:currencies` and crypt
 For the list of all supported options see `/:help`:
 
 ```
-    curl rate.sx/:help
+  $ curl rate.sx/:help
 ```
 
 The most important options:
@@ -99,7 +97,7 @@ They can be separated using the `&` sign (don't forget to escape or to quote it 
 it is a special shell symbol).
 
 ```
-    curl btc.rate.sx/?n=30
+  $ curl btc.rate.sx/?n=30
 ```
 
 ## Interval specification
@@ -110,7 +108,7 @@ To use other time interval you have to specify it in the url after coin name, se
 For example, to get info for the last 4 days, add `@4d`:
 
 ```
-    curl rate.sx/eth@4d
+ $  curl rate.sx/eth@4d
 ```
 
 The following time intervals specfiers are supported:
@@ -167,7 +165,7 @@ Don't afraid to be too inventive. If rate.sx can't parse your date, it will say 
 The toplevel intrval grammar is summarized below.
 
 ![rate.sx screenshot with plot and interval](http://rate.sx/files/screenshot-with-plot-and-interval.png)
-<p align='center'>*In this output, exchange rate of IOTA (MIOTA) to Euro (EUR) in March 2018 is displayed*</p>
+*In this output, exchange rate of IOTA (MIOTA) to Euro (EUR) in March 2018 is displayed.*
 
 Interval specifications grammar:
 
