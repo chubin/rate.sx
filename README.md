@@ -1,39 +1,81 @@
 
 *rate.sx* — console service for getting cryptocurrencies exchange rates
 
+## Features
+
+* realtime¹ currencies and cryptocurrencies exchange rates information
+* (crypto)currencies converter and calculator
+* historical² exchange rates graphical representation
+* clean, concise and very fast³ interface
+* available everywhere, no installation needed
+
 ## Usage
 
-You can access the service from a shell or from a Web browser:
+You can access the service from a shell or from a Web browser.
 
-To get current market capitalization (in USD) of the top ten cryptocoins in shell:
+To get information about current exchange rates and market capitalization
+of the top ten cryptocoins in shell:
 
 ```
     curl rate.sx
 ```
 
-Or if you want to get the output in some other currency,
-specify it in the domain name (lower-, upper- or mixed-case):
+![rate.sx screenshot](http://rate.sx/files/screenshot.png)
+
+By default, all rates are represented in USD.
+To use some other currency, specify it in the domain name (lower-, upper- or mixed-case):
 
 ```
     curl eur.rate.sx
 ```
 
-Also, you can use rate.sx in (crypto)currency calculator mode:
+Also, you can use rate.sx as *(crypto)currency converter/calculator*.
+To convert some amount of (crypto)currencies into other (crypto)currency, 
+you have to specify the amount in the query line, after `rate.sx/`.
+
+For example, to convert 10 Bitcoins (BTC) into US Dollars do:
 
 ```
-    $ curl eur.rate.sx/1BTC+1BCH+1BTG       # to convert sum of the bitcoins into Euro
-    $ curl rub.rate.sx/100ETH               # to convert 100 ETH into Russian ruble
-    $ curl rate.sx/1BTC-10ETH               # to compare what is more: 1 BTC or 10 ETH
+    curl rate.sx/10BTC
 ```
 
-To use it in a web browser, just type rate.sx in the location bar.
+You can also combine different currencies and cryptocurrencies in the same query:
 
-![rate.sx screenshot](http://rate.sx/files/screenshot.png)
+```
+    curl eur.rate.sx/1BTC+1BCH+1BTG       # convert sum of the Bitcoins (BTC, BCH and BTG) into Euro (EUR)
+    curl rub.rate.sx/100ETH               # convert 100 ETH into Russian ruble (RUB)
+    curl rate.sx/1BTC-10ETH               # compare what is more: 1 BTC or 10 ETH
+```
 
-## Features
+To show how cryptocurrency exchange rate was changing in time, 
+specify name of the cryptocurrency in the URL.
 
-* simple curl/browser interface
-* available everywhere, no installation needed
+For example, for Ethereum (ETH):
+
+```
+    curl rate.sx/eth
+```
+
+By default, data for the last 24 hours is displayed, but you can specify
+any³ other interval, using the `@range` notation (more on it below, in the *Interval specification* section).
+
+![rate.sx screenshot with plot](http://rate.sx/files/screenshot-with-plot.png)
+
+To display output in some other currency (USD is used by default) or to compare a cryptocurrency
+with another cryptocurrency, specify it in the domain name or after `/` in the query:
+
+```
+    curl rate.sx/eth@30d                # Ethereum to USD rate for the last 30 days
+    curl eur.rate.sx/btc@february       # How Bitcoin (BTC) price in EUR changed in February
+    curl xlm.rate.sx/xrp@01-Feb-2018..  # Is it true that 1 XRP (Ripple coin) since Feb 1 costs 3 XLM (Stellar)?
+```
+
+The time interval can be specified in many various ways. Though, most of them are intuitively clear,
+consult the Interval specification section just to see what interval formats are supported.
+
+You can the service in a web browser (though it is not its primary user interface),
+just type rate.sx in the location bar for that.
+
 
 ## Supported currencies and cryptocurrencies
 
@@ -45,7 +87,7 @@ You can find actual list of the supported currencies in `/:currencies` and crypt
 For the list of all supported options see `/:help`:
 
 ```
-    $ curl rate.sx/:help
+    curl rate.sx/:help
 ```
 
 The most important options:
@@ -57,7 +99,85 @@ They can be separated using the `&` sign (don't forget to escape or to quote it 
 it is a special shell symbol).
 
 ```
-    $ curl btc.rate.sx/?n=30
+    curl btc.rate.sx/?n=30
+```
+
+## Interval specification
+
+When showing exchange rates historical data, data for the last 24 hours is displayed by default.
+To use other time interval you have to specify it in the url after coin name, separated with the `@` sign.
+
+For example, to get info for the last 4 days, add `@4d`:
+
+```
+    curl rate.sx/eth@4d
+```
+
+The following time intervals specfiers are supported:
+
+```
+    s   Second
+    m   Minute
+    h   Hour
+    d   Day (24 hours)
+    w   Week
+    M   Month (30 days)
+    y   Year (365 days)
+```
+
+The specifiers *have to* be prefixed with an integer number (even if it is equal to 1)
+and can be combined together:
+
+```
+    10d     # 10 days
+    2w4d    # 2 weeks and 4 days
+    1h30m   # 1 hour and 30 minutes
+```
+
+In all these cases you specify the starting point of the interval, and the end is always the current time.
+That means, that information for the last time is shown.
+
+You can specify some range in the past. There are three options for that:
+
+1. You specify the starting and the stopping date (and/or if needed time) separated with `..` (the stopping date can be omited):
+
+```
+    10d..5d                     # from 10 days ago to 5 days ago
+    2018-01-10..2018-01-20      # from 2018-01-10 to 2018-01-20
+    2018-03-15+12:00..          # from 2018-03-15 12:00 till now
+```
+
+2. You specify the starting (or stopping) date/time and the delta separated with `+`, `-` or `+-`:
+
+```
+    2018-03-01+-3d              # March 01 and +- 3 days around it
+    2018-03-15+1w      			# one week starting from 2018-03-15
+    2018-03-25-2w          		# two weeks to 2018-03-25
+```
+
+3. You can specify some time range, and rate.sx try to guess what do you mean:
+
+```
+    February                    # the whole February (this year)
+    02-Feb                      # the whole day, February 2 (this year)
+    Март                        # you can even use other languages (Март is March in Russian)
+```
+
+Don't afraid to be too inventive. If rate.sx can't parse your date, it will say about it.
+The toplevel intrval grammar is summarized below.
+
+![rate.sx screenshot with plot and interval](http://rate.sx/files/screenshot-with-plot-and-interval.png)
+<p align='center'>*In this output, exchange rate of IOTA (MIOTA) to Euro (EUR) in March 2018 is displayed*</p>
+
+Interval specifications grammar:
+
+```
+    LENGTH
+    DATETIME
+    DATETIME..[DATETIME]
+    DATETIME+LENGTH
+    DATETIME-LENGTH
+    DATETIME+-LENGTH
 ```
 
 ## Output units
@@ -97,6 +217,12 @@ Displayed rates are composite prices and not intended to be used for investment 
 [rate-sx.el](https://github.com/davep/rate-sx.el) — rate.sx in Emacs (courtesy of Dave Pearson @davep)
 
 ![rate-sx.el screenshot](https://user-images.githubusercontent.com/28237/33782065-1569d88e-dc4f-11e7-9547-c9e14dcfd470.png)
+
+## Footnotes
+
+1. Data update interval is 5 minutes (300 seconds)
+2. Historical data covers the range starting on 07 Jan 2018
+3. 99.9% of all queries are processed within 150ms
 
 ## rate.sx Server Installation
 
