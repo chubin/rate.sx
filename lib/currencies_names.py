@@ -1,12 +1,4 @@
-#!/usr/bin/python
 # vim: encoding=utf-8
-
-import sys
-import os
-import requests
-import json
-import calendar
-import time
 
 """
 This file can be imported for currency related functions.
@@ -101,3 +93,8 @@ CRYPTO_CURRENCIES = [
     'EOS', 'DASH', 'XMR', 'TRX', 'BTG', 'ETC', 'ICX', 'QTUM', 'LSK', 'XRB',
 ]
 
+def currency_name(symbol):
+    """
+    Return full name of the currency ``symbol``
+    """
+    return CURRENCY_NAME.get(symbol, "")
