@@ -190,15 +190,15 @@ def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): 
     Number of ticks in the returned data can be greater than _number_of_ticks_
     """
 
-    ticks = []
-    meta = {}
-
     desired_interval = (time_end-time_start)/number_of_ticks
 
     chosen_interval = None
     for interval_name, interval_size in sorted(INTERVAL.items(), key=lambda x: -x[1]):
         if interval_size < desired_interval:
             chosen_interval = interval_name
+
+    # if interval is so small, we need to use the raw and not the aggregated data
+    collection_name = None
     if chosen_interval:
         collection_name = 'coins_%s' % chosen_interval
 
@@ -207,35 +207,66 @@ def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): 
     if key is None:
         key = "price_usd"
 
-    # this parameter should be take to the ticks
-    take_this = 'avg'
-
+    meta = {}
     ticks = []
-    meta = {
-        'symbol': entries[0]['symbol'],
-        'begin': entries[0][key]['begin'],
-        'end': entries[-1][key]['end'],
-        'time_begin': entries[0]['timestamp'],
-        'time_end': entries[-1]['time_end'],
-
-        'min': entries[0][key]['min'],
-        'max': entries[0][key]['max'],
-        'time_min': entries[0][key]['time_min'],
-        'time_max': entries[0][key]['time_max'],
-        }
-
     sum_ = 0
-    for entry in entries:
-        ticks.append(entry[key][take_this])
-        sum_ += entry[key]['avg']
 
-        if entry[key]['max'] > meta['max']:
-            meta['max'] = entry[key]['max']
-            meta['time_max'] = entry[key]['time_max']
+    if collection_name is None:
+        # not aggregated data
+        meta = {
+            'symbol': entries[0]['symbol'],
+            'begin': entries[0][key],
+            'end': entries[-1][key],
+            'time_begin': entries[0]['timestamp'],
+            'time_end': entries[-1]['timestamp'],
 
-        if entry[key]['min'] < meta['min']:
-            meta['min'] = entry[key]['min']
-            meta['time_min'] = entry[key]['time_min']
+            'min': entries[0][key],
+            'max': entries[0][key],
+            'time_min': entries[0]['timestamp'],
+            'time_max': entries[0]['timestamp'],
+            }
+
+        for entry in entries:
+            ticks.append(entry[key])
+            sum_ += entry[key]
+
+            if entry[key] > meta['max']:
+                meta['max'] = entry[key]
+                meta['time_max'] = entry['timestamp']
+
+            if entry[key] < meta['min']:
+                meta['min'] = entry[key]
+                meta['time_min'] = entry['timestamp']
+    else:
+        # aggregated data
+
+        # this parameter should be taken to the ticks
+        take_this = 'avg'
+
+        meta = {
+            'symbol': entries[0]['symbol'],
+            'begin': entries[0][key]['begin'],
+            'end': entries[-1][key]['end'],
+            'time_begin': entries[0]['timestamp'],
+            'time_end': entries[-1]['time_end'],
+
+            'min': entries[0][key]['min'],
+            'max': entries[0][key]['max'],
+            'time_min': entries[0][key]['time_min'],
+            'time_max': entries[0][key]['time_max'],
+            }
+
+        for entry in entries:
+            ticks.append(entry[key][take_this])
+            sum_ += entry[key]['avg']
+
+            if entry[key]['max'] > meta['max']:
+                meta['max'] = entry[key]['max']
+                meta['time_max'] = entry[key]['time_max']
+
+            if entry[key]['min'] < meta['min']:
+                meta['min'] = entry[key]['min']
+                meta['time_min'] = entry[key]['time_min']
 
     meta['avg'] = sum_/len(ticks)
 
@@ -244,12 +275,115 @@ def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): 
         'meta': meta,
     }
 
+def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key=None): # pylint: disable=too-many-locals,too-many-arguments
+    """
+    Aggregate coin pairs.
+    It works this way: find data for coin1 and find data for coin2,
+    after that divide coin1 data by coin2 pairwise.
+    This method is approximate for aggregated values.
+    """
+
+    desired_interval = (time_end-time_start)/number_of_ticks
+
+    chosen_interval = None
+    for interval_name, interval_size in sorted(INTERVAL.items(), key=lambda x: -x[1]):
+        if interval_size < desired_interval:
+            chosen_interval = interval_name
+
+    # if interval is so small, we need to use the raw and not the aggregated data
+    collection_name = None
+    if chosen_interval:
+        collection_name = 'coins_%s' % chosen_interval
+
+    entries1 = MONGO_READER.get_raw_data(
+        coin1, time_start, time_end, collection_name=collection_name)
+    entries2 = MONGO_READER.get_raw_data(
+        coin2, time_start, time_end, collection_name=collection_name)
+
+    if key is None:
+        key = "price_usd"
+
+    meta = {}
+    ticks = []
+    sum_ = 0
+
+    if collection_name is None:
+        # not aggregated data
+        meta = {
+            'symbol': entries1[0]['symbol'],
+            'begin': entries1[0][key]/entries2[0][key],
+            'end': entries1[-1][key]/entries2[-1][key],
+            'time_begin': entries1[0]['timestamp'],
+            'time_end': entries1[-1]['timestamp'],
+
+            'min': entries1[0][key]/entries2[0][key],
+            'max': entries1[0][key]/entries2[0][key],
+            'time_min': entries1[0]['timestamp'],
+            'time_max': entries1[0]['timestamp'],
+            }
+
+        for entry1, entry2 in zip(entries1, entries2):
+            this_value = entry1[key]/entry2[key]
+            ticks.append(this_value)
+            sum_ += this_value
+
+            if this_value > meta['max']:
+                meta['max'] = this_value
+                meta['time_max'] = entry1['timestamp']
+
+            if this_value < meta['min']:
+                meta['min'] = this_value
+                meta['time_min'] = entry1['timestamp']
+    else:
+        # aggregated data
+
+        # this parameter should be taken to the ticks
+        take_this = 'avg'
+
+        meta = {
+            'symbol': entries1[0]['symbol'],
+            'begin': entries1[0][key]['begin']/entries2[0][key]['begin'],
+            'end': entries1[-1][key]['end']/entries2[-1][key]['end'],
+            'time_begin': entries1[0]['timestamp'],
+            'time_end': entries1[-1]['time_end'],
+
+            'min': entries1[0][key]['min']/entries2[0][key]['max'],
+            'max': entries1[0][key]['max']/entries2[0][key]['min'],
+            'time_min': entries1[0][key]['time_min'],
+            'time_max': entries1[0][key]['time_max'],
+            }
+
+        for entry1, entry2 in zip(entries1, entries2):
+            this_value = entry1[key][take_this]/entry2[key][take_this]
+            ticks.append(this_value)
+            sum_ += this_value
+
+            if this_value > meta['max']:
+                meta['max'] = this_value
+                meta['time_max'] = entry1[key]['time_max']
+
+            if this_value < meta['min']:
+                meta['min'] = this_value
+                meta['time_min'] = entry1[key]['time_min']
+
+    meta['avg'] = sum_/len(ticks)
+
+    return {
+        'ticks': ticks,
+        'meta': meta,
+    }
+
+
 def main():
     """
     Aggregator of existing entries
     """
 
-    for coin in ['ETH']:
+    AGGREGATE_COINS = [
+        'BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'EOS',
+        'ADA', 'XLM', 'NEO', 'MIOTA', 'XMR',
+    ]
+    for coin in AGGREGATE_COINS: # ['BTC', 'ETH', 'XRP']:
 
         first_timestamp = MONGO_READER.get_first_timestamp(coin)
         last_timestamp = MONGO_READER.get_first_timestamp(coin, last=True)
