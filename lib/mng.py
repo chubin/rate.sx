@@ -6,7 +6,7 @@ Exports MonfoReader
 import sys
 import os
 import datetime
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
@@ -243,9 +243,10 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
             'timestamp_now': "%s UTC" % datetime.datetime.utcnow(),
         }
 
-    def get_raw_data(self, coin, start_time, stop_time, collection_name=None):
+    def get_raw_data(self, coin, start_time, stop_time, fields=None, collection_name=None): #pylint: disable=too-many-arguments
         """
-        Load raw _coin_ data from _start_time_ (>=) to _stop_time_ (<)
+        Load raw ``coin`` data from _start_time_ (>=) to _stop_time_ (<).
+        If ``coin`` is None (for currencies), get all data.
         """
 
         if collection_name:
@@ -253,17 +254,26 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
         else:
             coins = self.coins
 
-        query = {
-            'symbol':   coin,
+        if coin:
+            query = {'symbol':   coin,}
+        else:
+            query = {}
+
+        query.update({
             'timestamp': {'$gt': start_time - 1, '$lt': stop_time},
-        }
+        })
+
         sort_key = [("timestamp", 1)]
-        data = [x for x in coins.find(query).sort(sort_key)]
+        if fields:
+            data = [x for x in coins.find(query, fields).sort(sort_key)]
+        else:
+            data = [x for x in coins.find(query).sort(sort_key)]
         return data
 
     def get_first_timestamp(self, coin, last=False, collection_name=None):
         """
-        First timestamp for _coin_ in database.
+        First timestamp for ``coin`` in database.
+        If ``coin`` is None, check all entries (used for currencies).
         """
 
         if collection_name:
@@ -271,14 +281,16 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
         else:
             coins = self.coins
 
-        query = {
-            'symbol':   coin,
-        }
+        if coin:
+            query = {'symbol':   coin,}
+        else:
+            query = {}
+
         if last:
             sort_key = [("timestamp", -1)]
         else:
             sort_key = [("timestamp", 1)]
-        data = [x for x in coins.find(query).sort(sort_key).limit(1)]
+        data = [x for x in coins.find(query, {'timestamp': 1}).sort(sort_key).limit(1)]
         if data != []:
             return data[0]['timestamp']
         return None
@@ -298,23 +310,41 @@ class MongoWriter(object):
         self.marketcap = ratesx_db.marketcap
         self.currencies = ratesx_db.currencies
 
-        self.allowed_collections = ['coins_1h', 'coins_24']
+        self.allowed_collections = ['coins_1h', 'coins_24h', 'currencies_1h']
 
     def _get_collection(self, collection_name=None):
         if collection_name:
             if collection_name in self.allowed_collections:
                 coins = self.client.ratesx[collection_name]
             else:
-                raise KeyError("Not allowed collection name")
+                raise KeyError("Not allowed collection name: %s" % collection_name)
         else:
             coins = self.coins
+
+        if collection_name \
+            and collection_name not in self.client.ratesx.collection_names():
+
+            if collection_name.startswith('coins_'):
+                coins.create_index([('symbol', ASCENDING)], unique=False)
+                coins.create_index([('timestamp', ASCENDING)], unique=False)
+                coins.create_index([('symbol', ASCENDING),
+                                    ('timestamp', ASCENDING)], unique=True)
+
+            if collection_name.startswith('currencies_'):
+                coins.create_index([('timestamp', ASCENDING)], unique=False)
+
         return coins
 
     def update(self, entry, collection_name=None):
         "coll.replace_one() wrapper"
 
         coins = self._get_collection(collection_name)
-        coins.replace_one({'symbol':entry['symbol'], 'timestamp':entry['timestamp']}, entry, True)
+        if 'symbol' in entry:
+            coins.replace_one(
+                {'symbol':entry['symbol'], 'timestamp':entry['timestamp']}, entry, True)
+        else:
+            coins.replace_one(
+                {'timestamp':entry['timestamp']}, entry, True)
 
     def insert_many(self, entries, collection_name=None):
         "coll.insertMany() wrapper"

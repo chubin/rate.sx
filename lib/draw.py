@@ -3,7 +3,7 @@
 
 """
  1 [ ] update all coins data
- 2 [ ] currencies support
+ 2 [X] currencies support
  3 [ ] add update script to cron
 
  4 [X] high alignment calculation
@@ -35,14 +35,15 @@
 25 [X] add nice colors
 26 [X] add message about @interval
 27 [X] add message about /help
-28 [ ] add message to the main page
+28 [ ] add the message to the main page
 29 [X] clean up the code, remove all warnings
 
 30 [X] support of small intervals
 31 [X] output coin choice
 
-32 [ ] fix strange bug of diagram
+32 [ ] fix the strange bug of diagram
 33 [ ] coin position change
+34 [ ] add a warning if interval is truncated
 """
 
 import sys
@@ -59,6 +60,7 @@ sys.path.append("%s/lib/" % MYDIR)
 # pylint: disable=wrong-import-position
 import aggregate
 import coins_names
+import currencies_names
 import interval
 from ansi_utils import colorize_number
 from to_precision import to_precision
@@ -339,11 +341,11 @@ def _parse_query(query):
     if '/' in coin:
         coin, coin2 = coin.split('/', 1)
 
-    if coins_names.coin_name(coin) == '':
-        raise SyntaxError("Invalid coin name: %s" % coin)
+    if coins_names.coin_name(coin) == '' and currencies_names.currency_name(coin) == '':
+        raise SyntaxError("Invalid coin/currency name: %s" % coin)
 
-    if coin2 and coins_names.coin_name(coin2) == '':
-        raise SyntaxError("Invalid coin name: %s" % coin2)
+    if coin2 and coins_names.coin_name(coin2) == '' and currencies_names.currency_name(coin2) == '':
+        raise SyntaxError("Invalid coin/currency name: %s" % coin2)
 
     time_begin, time_end = interval.parse_interval(interval_string)
     if time_begin is None or time_end is None:

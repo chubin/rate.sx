@@ -102,6 +102,7 @@ Example of an entry:
 
 import math
 
+from currencies_names import currency_name
 from mng import MongoReader, MongoWriter
 MONGO_READER = MongoReader()
 MONGO_WRITER = MongoWriter()
@@ -144,6 +145,58 @@ def aggregate_coin(coin, time_start, interval):
 
     for key in keys:
 
+        aggregated = {
+            'min':  entries[0].get(key),
+            'max':  entries[0].get(key),
+            'begin':entries[0].get(key),
+            'end':  entries[-1].get(key),
+            'time_min': entries[0].get('timestamp'),
+            'time_max': entries[0].get('timestamp'),
+        }
+
+        sum_ = 0
+        for entry in entries:
+            this = entry.get(key)
+            time_this = entry.get('timestamp')
+
+            if this > aggregated['max']:
+                aggregated['max'] = this
+                aggregated['time_max'] = time_this
+
+            if this < aggregated['min']:
+                aggregated['min'] = this
+                aggregated['time_min'] = time_this
+
+            sum_ += this
+        aggregated['avg'] = sum_/len(entries)
+
+        result[key] = aggregated
+
+    return result
+
+def aggregate_currencies(_, time_start, interval):
+    """
+    ``coin`` is always None; it is used here, because I want to merge aggregation
+    function later.
+
+    Aggregate 5min currencies data starting from _start_time_
+    for _interval_ (in seconds; must be divisible by 5m)
+    and return aggregated information (dictionary).
+
+    Fields of the result: min, max, avg, begin, end
+    """
+
+    time_end = time_start + interval
+    entries = MONGO_READER.get_raw_data(None, time_start, time_end, collection_name='currencies')
+
+    result = {
+        'timestamp': entries[0].get('timestamp'),
+        'time_end': entries[-1].get('timestamp'),
+        'number_of_aggregated': len(entries),
+    }
+    currencies = [k for k in entries[0].keys()
+                  if not k.startswith('_') and k not in ['timestamp', 'last_updated']]
+    for key in currencies:
         aggregated = {
             'min':  entries[0].get(key),
             'max':  entries[0].get(key),
@@ -275,13 +328,16 @@ def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): 
         'meta': meta,
     }
 
-def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key=None): # pylint: disable=too-many-locals,too-many-arguments
+def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key=None): # pylint: disable=too-many-locals,too-many-arguments,too-many-branches,too-many-statements
     """
-    Aggregate coin pairs.
-    It works this way: find data for coin1 and find data for coin2,
-    after that divide coin1 data by coin2 pairwise.
+    Aggregate coin pairs (or coin and currency pairs).
+    It works this way: find data for ``coin1`` and find data for ``coin2``,
+    after that divide ``coin1`` data by ``coin2`` pairwise.
     This method is approximate for aggregated values.
+    ``coin2`` can be a currency.
     """
+
+    coin2_is_currency = bool(currency_name(coin2))
 
     desired_interval = (time_end-time_start)/number_of_ticks
 
@@ -295,13 +351,39 @@ def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key
     if chosen_interval:
         collection_name = 'coins_%s' % chosen_interval
 
-    entries1 = MONGO_READER.get_raw_data(
-        coin1, time_start, time_end, collection_name=collection_name)
-    entries2 = MONGO_READER.get_raw_data(
-        coin2, time_start, time_end, collection_name=collection_name)
-
     if key is None:
         key = "price_usd"
+
+    entries1 = MONGO_READER.get_raw_data(
+        coin1, time_start, time_end, collection_name=collection_name)
+
+    # depeding on (1) that we have a currency in coin2 or not
+    # and (2) if data is aggregated, we have to read entries2 from different collections
+    # and in one case postprocess them
+    if collection_name is None and coin2_is_currency:
+
+        if collection_name is None:
+            currencies_collection = 'currencies'
+        else:
+            currencies_collection = collection_name.replace('coins_', 'currencies_')
+
+        fields = {'timestamp': 1, coin2: 1}
+        entries2 = MONGO_READER.get_raw_data(
+            None, time_start, time_end,
+            collection_name=currencies_collection,
+            fields=fields)
+
+        new_entries2 = []
+        for entry in entries2:
+            entry.update({key: entry[coin2]})
+            new_entries2.append(entry)
+        entries2 = new_entries2
+
+    else:
+        entries2 = MONGO_READER.get_raw_data(
+            coin2, time_start, time_end, collection_name=collection_name)
+
+    # print "len(entries2) = ", len(entries2)
 
     meta = {}
     ticks = []
@@ -373,8 +455,54 @@ def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key
         'meta': meta,
     }
 
+def aggregate_new_entries(coin):
+    """
+    Aggregate new entries for ``coin``. If ``coin`` is none, aggregate currencies.
+    """
 
-def main():
+    if coin:
+        aggregation_function = aggregate_coin
+        collection_prefix = 'coins_'
+    else:
+        aggregation_function = aggregate_currencies
+        collection_prefix = 'currencies_'
+
+    first_timestamp = MONGO_READER.get_first_timestamp(coin)
+    last_timestamp = MONGO_READER.get_first_timestamp(coin, last=True)
+
+    for interval_name, interval_size in INTERVAL.items():
+        collection_name = collection_prefix + interval_name
+
+        last_aggregated_timestamp = \
+            MONGO_READER.get_first_timestamp(coin, last=True, collection_name=collection_name)
+        if last_aggregated_timestamp is None:
+            print "[%s/%s] last_aggregated_timestamp is None" % (collection_name, coin)
+            last_aggregated_timestamp = first_timestamp
+        print "[%s/%s] %s entries to insert/update" % \
+            (collection_name, coin,
+             int(math.ceil((last_timestamp - last_aggregated_timestamp)*1.0/interval_size)))
+
+        inserted_entries = 0
+        timestamp = last_aggregated_timestamp
+        while timestamp <= last_timestamp:
+            entry = aggregation_function(coin, timestamp, interval_size)
+
+            #import json
+            #print json.dumps(entry)
+
+            # we insert all entries except the last one,
+            # because it is possible that it is not yet completed
+            # therefore we insert entry first, and calculate a new one thereafter
+            if entry:
+                MONGO_WRITER.update(entry, collection_name)
+                inserted_entries += 1
+                if entry['number_of_aggregated'] != interval_size/300:
+                    print "[%s/%s] entry[%s][number_of_aggregated] = %s" % \
+                        (collection_name, coin, inserted_entries, entry['number_of_aggregated'])
+            timestamp += interval_size
+        print "[%s/%s] Updated %s entries" % (collection_name, coin, inserted_entries)
+
+def do_coins():
     """
     Aggregator of existing entries
     """
@@ -384,6 +512,7 @@ def main():
         'ADA', 'XLM', 'NEO', 'MIOTA', 'XMR',
     ]
     for coin in AGGREGATE_COINS: # ['BTC', 'ETH', 'XRP']:
+        aggregate_new_entries(coin)
 
         first_timestamp = MONGO_READER.get_first_timestamp(coin)
         last_timestamp = MONGO_READER.get_first_timestamp(coin, last=True)
@@ -399,7 +528,6 @@ def main():
             print "[%s/%s] %s entries to insert/update" % \
                 (collection_name, coin,
                  int(math.ceil((last_timestamp - last_aggregated_timestamp)*1.0/interval_size)))
-            #continue
 
             inserted_entries = 0
             timestamp = last_aggregated_timestamp
@@ -416,6 +544,18 @@ def main():
                             (collection_name, coin, inserted_entries, entry['number_of_aggregated'])
                 timestamp += interval_size
             print "[%s/%s] Updated %s entries" % (collection_name, coin, inserted_entries)
+
+def main():
+    """
+    Aggregator of existing entries
+    """
+    coins_to_aggregate = [
+        None,
+        'BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'EOS',
+        'ADA', 'XLM', 'NEO', 'MIOTA', 'XMR',
+    ]
+    for coin in coins_to_aggregate:
+        aggregate_new_entries(coin)
 
 if __name__ == '__main__':
     main()
