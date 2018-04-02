@@ -256,6 +256,8 @@ def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): 
         collection_name = 'coins_%s' % chosen_interval
 
     entries = MONGO_READER.get_raw_data(coin, time_start, time_end, collection_name=collection_name)
+    if entries == []:
+        return {'meta':{}, 'ticks':[]}
 
     if key is None:
         key = "price_usd"
@@ -356,6 +358,8 @@ def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key
 
     entries1 = MONGO_READER.get_raw_data(
         coin1, time_start, time_end, collection_name=collection_name)
+    if entries1 == []:
+        return {'meta':{}, 'ticks':[]}
 
     # depeding on (1) that we have a currency in coin2 or not
     # and (2) if data is aggregated, we have to read entries2 from different collections
