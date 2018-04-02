@@ -107,7 +107,7 @@ def _format_percentage(value):
     return res
 
 
-class Diagram(object):
+class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
     """
     Diagram drawer. Uses ``data`` (with ``meta`` and ``ticks``) as its input,
@@ -124,6 +124,8 @@ class Diagram(object):
         self.warnings = []
 
         self.interval = interval_pair[1] - interval_pair[0]
+        self.currency = self.options.get('currency' or 'USD')
+        self.currency_symbol = currencies_names.SYMBOL.get(self.currency)
 
     def _align_label(self, timestamp, label):
         """
@@ -167,6 +169,13 @@ class Diagram(object):
         result = datetime.datetime.fromtimestamp(timestamp).strftime(fmt)
         return result
 
+    def _format_currency(self, value):
+        if not isinstance(value, str):
+            value = _format_value(value)
+        if self.currency_symbol:
+            return '%s%s' % (self.currency_symbol.decode('utf8'), value)
+        return '%s %s' % (value, self.currency)
+
     def _show_change_percentage(self):
         f_p = _format_percentage
         meta = self.data['meta']
@@ -187,7 +196,16 @@ class Diagram(object):
             #self._format_time(meta['time_end'], show_date=True, show_time=True),
 
         output = "\n"
-        output += u"{-1▶ %s (%s) }{1▶}" % (coin_name, coin_symbol)
+        if self.currency == 'USD':
+            output += u"{-1▶ %s (%s) }{1▶}" % (coin_name, coin_symbol)
+        else:
+            currency_symbol = self.currency
+            currency_name = currencies_names.currency_name(self.currency)
+            if not currency_name:
+                currency_name = coins_names.coin_name(self.currency)
+
+            output += u"{-1▶ %s (%s) to %s (%s) }{1▶}" % \
+                      (coin_name, coin_symbol, currency_name, currency_symbol)
         #output += u"{1%s (%s)}," % (coin_name, coin_symbol)
         output += " %s" % (time_interval)
         output += " %s\n" % self._show_change_percentage()[1]
@@ -197,7 +215,7 @@ class Diagram(object):
 
     def _make_footer(self):
 
-        f_f = lambda x: to_precision(x, 5)
+        f_f = lambda x: self._format_currency(to_precision(x, 5))
         f_t = lambda t: self._format_time(t, show_date=True, show_time=True)
 
         meta = self.data['meta']
@@ -379,6 +397,7 @@ def main():
         width=80,
         height=25,
         msg_interval='@' not in query,
+        currency=coin2 or 'USD',
     )
     dia = Diagram(data, (time_begin, time_end), options=options)
     dia.print_view()
