@@ -97,8 +97,11 @@ PALETTES_REVERSE = {
     },
 }
 
-def _format_value(value):
-    return str(to_precision(value, 3))
+def _format_value(value, precision=3):
+    value = str(to_precision(value, precision))
+    if 'e' in value:
+        return str(float(value))
+    return value
 
 def _format_percentage(value):
     res = "%.2f%%" % value
@@ -215,7 +218,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
     def _make_footer(self):
 
-        f_f = lambda x: self._format_currency(to_precision(x, 5))
+        f_f = lambda x: self._format_currency(_format_value(x, precision=5))
         f_t = lambda t: self._format_time(t, show_date=True, show_time=True)
 
         meta = self.data['meta']
@@ -316,7 +319,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         else:
             output += MSG_SEE_HELP
 
-        return output
+        return output + "\n"
 
     def make_view(self):
         """
@@ -365,31 +368,37 @@ def _parse_query(query):
     if coin2 and coins_names.coin_name(coin2) == '' and currencies_names.currency_name(coin2) == '':
         raise SyntaxError("Invalid coin/currency name: %s" % coin2)
 
-    time_begin, time_end = interval.parse_interval(interval_string)
+    try:
+        time_begin, time_end = interval.parse_interval(interval_string)
+    except OverflowError:
+        # to be fixed: ranges like yesterday, today, now and so on
+        raise RuntimeError("Wrong range specification: %s" % interval_string)
+
     if time_begin is None or time_end is None:
         raise SyntaxError("Invalid time interval specification: %s" % interval_string)
 
     return coin, coin2, time_begin, time_end
 
-def main():
-    "experimenting with get_aggregated_coin()"
-
-    if sys.argv == []:
-        query = 'ETH@4d'
-    else:
-        query = sys.argv[1]
+def view(query):
+    """
+    Main rendering function, entry point for this module.
+    Returns rendered view for the query.
+    """
 
     try:
         coin, coin2, time_begin, time_end = _parse_query(query)
     except SyntaxError as e_msg:
-        print "ERROR: %s" % e_msg
-        sys.exit(1)
+        raise RuntimeError("%s" % e_msg)
 
     ticks = 80
     if coin2:
         data = aggregate.get_aggregated_pair(coin, coin2, time_begin, time_end, ticks)
     else:
         data = aggregate.get_aggregated_coin(coin, time_begin, time_end, ticks)
+
+    if data['ticks'] == []:
+        raise RuntimeError("No data found for your query. Wrong range?")
+
     #import json
     #print json.dumps(data['meta'], indent=True)
 
@@ -400,7 +409,22 @@ def main():
         currency=coin2 or 'USD',
     )
     dia = Diagram(data, (time_begin, time_end), options=options)
-    dia.print_view()
+    return dia.make_view()
+
+def main():
+    "experimenting with get_aggregated_coin()"
+
+    if sys.argv == []:
+        query = 'ETH@4d'
+    else:
+        query = sys.argv[1]
+
+    try:
+        sys.stdout.write(view(query))
+    except RuntimeError as e_msg:
+        print "ERROR: %s" % e_msg
+        sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
