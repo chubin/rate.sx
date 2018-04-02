@@ -1,8 +1,11 @@
-import gevent
-from gevent.wsgi import WSGIServer
-from gevent.queue import Queue
+"""
+Main view interface.
+Router queries to various views (table, calculator, plot).
+Caches the results. Handles exceptions.
+"""
+
 from gevent.monkey import patch_all
-from gevent.subprocess import Popen, PIPE, STDOUT
+from gevent.subprocess import Popen, PIPE
 patch_all()
 
 import sys
@@ -68,6 +71,7 @@ def get_cmd_output(hostname, topic, request_options):
         if currency == 'COIN':
             return "Use YOUR COIN instead of COIN in the query: for example btg.rate.sx, xvg.rate.sx, eth.rate.sx and so on\nTry:\n curl btg.rate.sx\n curl xvg.rate.sx\n curl xrb.rate.sx\n"
 
+        use_currency = currency
         if currency not in currencies_names.SUPPORTED_CURRENCIES \
             and currency not in currencies_names.CRYPTO_CURRENCIES + ['coin']:
             currency = 'USD'
@@ -78,16 +82,17 @@ def get_cmd_output(hostname, topic, request_options):
             except ValueError, e:
                 return "ERROR: %s\n" % e
 
+            if answer is None:
+                try:
+                    answer = draw.view(topic, use_currency=use_currency)
+                except RuntimeError, e:
+                    return "ERROR: %s\n" % e
+
             if answer is not None:
                 open(cache_file, 'w').write(str(answer)+"\n")
                 return "%s\n" % answer
             else:
-                try:
-                    return draw.view(topic)
-                except RuntimeError, e:
-                    return "ERROR: %s" % e
-
-                #return "ERROR: Can't parse your query: %s\n" % topic
+                return "ERROR: Can't parse your query: %s\n" % topic
 
         cmd = ["%s/ve/bin/python" % MYDIR, "%s/bin/show_data.py" % MYDIR, currency, topic]
 

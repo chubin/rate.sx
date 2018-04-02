@@ -20,7 +20,7 @@
 
 15 [X] move to a separate module
 
-16 [ ] url support
+16 [X] url support
 17 [ ] terminal size
 18 [ ] json output
 
@@ -44,6 +44,7 @@
 32 [ ] fix the strange bug of diagram
 33 [ ] coin position change
 34 [ ] add a warning if interval is truncated
+35 [ ] add a warning if one of the currencies is overridden
 """
 
 import sys
@@ -97,11 +98,16 @@ PALETTES_REVERSE = {
     },
 }
 
-def _format_value(value, precision=3):
+def _format_value(value, precision=3, show_plus=False):
     value = str(to_precision(value, precision))
+
+    plus = ''
+    if show_plus and not value.startswith('-'):
+        plus = '+'
+
     if 'e' in value:
-        return str(float(value))
-    return value
+        return plus + str(float(value)).lstrip('+')
+    return plus + value.lstrip('+')
 
 def _format_percentage(value):
     res = "%.2f%%" % value
@@ -184,7 +190,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         meta = self.data['meta']
         change = meta['end'] - meta['begin']
         change_percentage = 100.0*change/meta['begin']
-        return colorize_number(to_precision(change, 5)), \
+        return colorize_number(_format_value(change, precision=5, show_plus=True)), \
                colorize_number(f_p(change_percentage))
 
     def _make_header(self):
@@ -379,10 +385,12 @@ def _parse_query(query):
 
     return coin, coin2, time_begin, time_end
 
-def view(query):
+def view(query, use_currency=None):
     """
     Main rendering function, entry point for this module.
-    Returns rendered view for the query.
+    Returns rendered view for the ``query``.
+    If currency is specified in ``query``, it overrides ``currency``.
+    If ``currency`` is not specified, USD is used.
     """
 
     try:
@@ -390,6 +398,15 @@ def view(query):
     except SyntaxError as e_msg:
         raise RuntimeError("%s" % e_msg)
 
+    # if currency is specified in the domain name (use_currency)
+    # but not in the query, then we use it as the output currency
+    if use_currency \
+        and not coin2 \
+        and (coins_names.coin_name(use_currency) != '' \
+            or currencies_names.currency_name(use_currency) != ''):
+        coin2 = use_currency
+
+    print coin2
     ticks = 80
     if coin2:
         data = aggregate.get_aggregated_pair(coin, coin2, time_begin, time_end, ticks)
