@@ -23,6 +23,7 @@ import calculator
 
 import view
 import coins_names
+import draw
 
 from globals import error, ANSI2HTML
 from buttons import TWITTER_BUTTON, GITHUB_BUTTON, GITHUB_BUTTON_FOOTER
@@ -81,7 +82,12 @@ def get_cmd_output(hostname, topic, request_options):
                 open(cache_file, 'w').write(str(answer)+"\n")
                 return "%s\n" % answer
             else:
-                return "ERROR: Can't parse your query: %s\n" % topic
+                try:
+                    return draw.view(topic)
+                except RuntimeError, e:
+                    return "ERROR: %s" % e
+
+                #return "ERROR: Can't parse your query: %s\n" % topic
 
         cmd = ["%s/ve/bin/python" % MYDIR, "%s/bin/show_data.py" % MYDIR, currency, topic]
 
