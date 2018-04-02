@@ -13,8 +13,8 @@
  8 [X] change (percent)
  9 [X] currency fullname
 10 [X] header (human readable interval)
-11 [ ] left axis
-12 [ ] bottom axis
+11 [/] left axis
+12 [/] bottom axis
 13 [X] date/time input
 14 [X] intervals
 
@@ -32,14 +32,17 @@
 
 24 [ ] commit
 
-25 [ ] add nice colors
-26 [ ] add message about @interval
-27 [ ] add message about /help
-28 [ ] add meessage to the main page
+25 [X] add nice colors
+26 [X] add message about @interval
+27 [X] add message about /help
+28 [ ] add message to the main page
 29 [X] clean up the code, remove all warnings
 
-30 [ ] support of small intervals
-31 [ ] output coin choice
+30 [X] support of small intervals
+31 [X] output coin choice
+
+32 [ ] fix strange bug of diagram
+33 [ ] coin position change
 """
 
 import sys
@@ -58,37 +61,45 @@ import aggregate
 import coins_names
 import interval
 from ansi_utils import colorize_number
+from to_precision import to_precision
+from globals import MSG_SEE_HELP, MSG_INTERVAL
 # pylint: enable=wrong-import-position
 
 PALETTES = {
     0: {
         1: Fore.WHITE,
+        2: Style.DIM,
     },
     1: {
         1: Fore.CYAN,
+        2: Style.DIM,
     },
     2: {
         1: Fore.RED,
-    }
+        2: Style.DIM,
+    },
 }
 
 PALETTES_REVERSE = {
     0: {
         1: Back.WHITE + Fore.BLACK,
+        2: Style.DIM,
     },
     1: {
         1: Back.CYAN + Fore.BLACK,
+        2: Style.DIM,
     },
     2: {
         1: Back.RED + Fore.BLACK,
-    }
+        2: Style.DIM,
+    },
 }
 
 def _format_value(value):
-    return "%5.2f" % value
+    return str(to_precision(value, 3))
 
 def _format_percentage(value):
-    res = "%5.2f%%" % value
+    res = "%.2f%%" % value
     if value > 0:
         res = "+"+res
     return res
@@ -104,12 +115,11 @@ class Diagram(object):
 
     def __init__(self, data, interval_pair, options=None):
         self.data = data
-        if options is None:
-            options = {}
-
-        self.width = options.get('width', 80)
-        self.height = options.get('height', 25)
+        self.options = options if options is not None else {}
+        self.width = self.options.get('width', 80)
+        self.height = self.options.get('height', 25)
         self.palette = 0
+        self.warnings = []
 
         self.interval = interval_pair[1] - interval_pair[0]
 
@@ -160,9 +170,10 @@ class Diagram(object):
         meta = self.data['meta']
         change = meta['end'] - meta['begin']
         change_percentage = 100.0*change/meta['begin']
-        return colorize_number(change), colorize_number(f_p(change_percentage))
+        return colorize_number(to_precision(change, 5)), \
+               colorize_number(f_p(change_percentage))
 
-    def _show_header(self):
+    def _make_header(self):
         coin_symbol = self.data['meta']['symbol']
         coin_name = coins_names.coin_name(coin_symbol)
 
@@ -174,35 +185,39 @@ class Diagram(object):
             #self._format_time(meta['time_end'], show_date=True, show_time=True),
 
         output = "\n"
-        #output += u"{-1▶ %s (%s) }{1▶}" % (coin_name, coin_symbol)
-        output += u"{1%s (%s)}," % (coin_name, coin_symbol)
+        output += u"{-1▶ %s (%s) }{1▶}" % (coin_name, coin_symbol)
+        #output += u"{1%s (%s)}," % (coin_name, coin_symbol)
         output += " %s" % (time_interval)
         output += " %s\n" % self._show_change_percentage()[1]
         output += "\n\n"
 
         return output
 
-    def _show_footer(self):
+    def _make_footer(self):
 
-        f_f = _format_value
+        f_f = lambda x: to_precision(x, 5)
         f_t = lambda t: self._format_time(t, show_date=True, show_time=True)
 
         meta = self.data['meta']
 
         output = "\n\n"
-        output += "begin: %s (%s)" % (meta['begin'], f_t(meta['time_begin'])) + \
-                  " // " + \
-                  "end: %s (%s)" % (meta['end'], f_t(meta['time_end'])) + \
+        output += "" + \
+                  "{2begin:} %s (%s)" % (f_f(meta['begin']), f_t(meta['time_begin'])) + \
+                  "{2 // }" + \
+                  "{2end:} %s (%s)" % (f_f(meta['end']), f_t(meta['time_end'])) + \
                   "\n"
-        output += "high: %s (%s)" % (meta['max'], f_t(meta['time_max'])) + \
-                  " // " + \
-                  "low: %s (%s)" % (meta['min'], f_t(meta['time_min'])) + \
+        output += "" + \
+                  "{2high:} %s (%s)" % (f_f(meta['max']), f_t(meta['time_max'])) + \
+                  "{2 // }" + \
+                  "{2low:} %s (%s)" % (f_f(meta['min']), f_t(meta['time_min'])) + \
                   "\n"
-        output += "avg: %s" % f_f(meta['avg']) + \
-                  " // " + \
-                  "median: %s" % f_f((meta['max'] + meta['min'])/2) + \
-                  " // " + \
-                  "change: %s (%s)" % self._show_change_percentage()
+        output += "" + \
+                  "{2avg:} %s" % f_f(meta['avg']) + \
+                  "{2 // }" + \
+                  "{2median:} %s" % f_f((meta['max'] + meta['min'])/2) + \
+                  "{2 // }" + \
+                  "{2change:} %s (%s)" % self._show_change_percentage() + \
+                  "\n"
 
         return output
 
@@ -231,10 +246,7 @@ class Diagram(object):
 
         return re.sub("{.*?}", _colorize_curlies_block, text)
 
-    def generate_diagram(self):
-        """
-        Show diagram for ``data``
-        """
+    def _make_diagram(self):
 
         class Option(object): #pylint: disable=too-many-instance-attributes,too-few-public-methods
             """Diagram configuration."""
@@ -254,12 +266,8 @@ class Diagram(object):
 
         data = self.data
 
-        #print len(data['ticks'])
         istream = [str(x) for x in data['ticks']]
-        #print "\n".join(istream)
-
         ostream = StringIO.StringIO()
-
         size = diagram.Point((self.width, self.height))
         option = Option()
         engine = diagram.AxisGraph(size, option)
@@ -272,19 +280,43 @@ class Diagram(object):
         lines = [high_line] + ostream.getvalue().splitlines() + [low_line]
 
         output = ""
-        output += self._show_header()
         output += "\n".join([u"  │ %s" % x.decode('utf-8') for x in lines])
         output += u"\n  └" + u"─" * 80
-        output += self._show_footer()
+
+        return output
+
+    def _make_messages(self):
+
+        output = ""
+        for line in self.warnings:
+            output += "WARNING: %s\n" % line
+
+        if self.options.get('msg_interval'):
+            output += MSG_INTERVAL
+        else:
+            output += MSG_SEE_HELP
+
+        return output
+
+    def make_view(self):
+        """
+        Show diagram for ``self.data``
+        """
+
+        output = ""
+        output += self._make_header()
+        output += self._make_diagram()
+        output += self._make_footer()
+        output += self._make_messages()
 
         output = self._colorize(output)
         return output
 
-    def show_diagram(self):
+    def print_view(self):
         """
         Show diagram on the standard output.
         """
-        print self.generate_diagram()
+        print self.make_view()
 
 def _split_query(query):
 
@@ -303,14 +335,21 @@ def _parse_query(query):
     coin, interval_string = _split_query(query)
 
     coin = coin.upper()
+    coin2 = None
+    if '/' in coin:
+        coin, coin2 = coin.split('/', 1)
+
     if coins_names.coin_name(coin) == '':
         raise SyntaxError("Invalid coin name: %s" % coin)
+
+    if coin2 and coins_names.coin_name(coin2) == '':
+        raise SyntaxError("Invalid coin name: %s" % coin2)
 
     time_begin, time_end = interval.parse_interval(interval_string)
     if time_begin is None or time_end is None:
         raise SyntaxError("Invalid time interval specification: %s" % interval_string)
 
-    return coin, time_begin, time_end
+    return coin, coin2, time_begin, time_end
 
 def main():
     "experimenting with get_aggregated_coin()"
@@ -321,19 +360,26 @@ def main():
         query = sys.argv[1]
 
     try:
-        coin, time_begin, time_end = _parse_query(query)
+        coin, coin2, time_begin, time_end = _parse_query(query)
     except SyntaxError as e_msg:
         print "ERROR: %s" % e_msg
         sys.exit(1)
 
-
     ticks = 80
-    data = aggregate.get_aggregated_coin(coin, time_begin, time_end, ticks)
+    if coin2:
+        data = aggregate.get_aggregated_pair(coin, coin2, time_begin, time_end, ticks)
+    else:
+        data = aggregate.get_aggregated_coin(coin, time_begin, time_end, ticks)
     #import json
     #print json.dumps(data['meta'], indent=True)
 
-    dia = Diagram(data, (time_begin, time_end))
-    dia.show_diagram()
+    options = dict(
+        width=80,
+        height=25,
+        msg_interval='@' not in query,
+    )
+    dia = Diagram(data, (time_begin, time_end), options=options)
+    dia.print_view()
 
 if __name__ == '__main__':
     main()
