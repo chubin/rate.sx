@@ -858,7 +858,6 @@ COINS_NAMES = (
     ("MAO", "Mao Zedong"),
     ("$$$", "Money"),
     ("ICE", "iDice"),
-    ("BTG", "Bitgem"),
     ("STV", "Sativacoin"),
     ("XVP", "Virtacoinplus"),
     ("MAD", "SatoshiMadness"),
@@ -1005,6 +1004,7 @@ COINS_NAMES = (
     ("BUN", "BunnyCoin"),
     ("JNS", "Janus"),
 )
+    # ("BTG", "Bitgem"),
 
 def coin_name(symbol):
     """
