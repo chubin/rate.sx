@@ -20,6 +20,9 @@ MSG_GITHUB_BUTTON = ' ' + '\033[100;30m' + '[github.com/chubin/rate.sx]' + Style
 MSG_FOLLOW_ME = '[Follow \033[46m\033[30m@igor_chubin\033[0m for updates]' + Style.RESET_ALL
 MSG_FOLLOW_ME = Fore.CYAN + '[Follow @igor_chubin for rate.sx updates]' + Style.RESET_ALL
 MSG_NEW_FEATURE = 'See ' + _g('rate.sx/:help') + ' for help and disclaimer'
+MSG_NEW_FEATURE = Fore.YELLOW + 'NEW FEATURE:' + Style.RESET_ALL \
+                    + ' to see cryptocurrency exchange rate, do ' \
+                    + _g('curl rate.sx/eth') + ' (or any other coin insted of ETH)'
 MSG_SEE_HELP = 'See ' + _g('rate.sx/:help') + ' for help and disclaimer'
 MSG_INTERVAL = ('Use '
                 + _g('@')
