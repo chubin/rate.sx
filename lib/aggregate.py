@@ -100,9 +100,13 @@ Example of an entry:
 
 """
 
+import logging
 import math
+import os
 
 from currencies_names import currency_name
+from coins_names import COINS_NAMES
+
 from mng import MongoReader, MongoWriter
 MONGO_READER = MongoReader()
 MONGO_WRITER = MongoWriter()
@@ -110,6 +114,21 @@ INTERVAL = {
     '1h':       1*3600,
 }
 #    '24h':      24*3600,
+DEBUG_LEVEL = 0
+
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
+LOGFILE = "%s/log/aggregate.log" % MYDIR
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    filename=LOGFILE,
+    level=logging.INFO)
+
+def _log(message):
+    if DEBUG_LEVEL > 0:
+        logging.info(message)
+
+def _log_error(message):
+    logging.error(message)
 
 def _get_entries(coin, start_time, end_time):
     data = MONGO_READER.get_raw_data(coin, start_time, end_time)
@@ -227,7 +246,7 @@ def aggregate_currencies(_, time_start, interval):
     return result
 
 
-def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): # pylint: disable=too-many-locals
+def get_aggregated_coin(coin, time_start, time_end, number_of_ticks, key=None): # pylint: disable=too-many-locals,too-many-branches
     """
     Highlevel reader that returns aggregated data ticks (based on agregated data)
     and agregated info about the data (min, max and so on).
@@ -340,7 +359,6 @@ def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key
     """
 
     coin2_is_currency = bool(currency_name(coin2))
-
     desired_interval = (time_end-time_start)/number_of_ticks
 
     chosen_interval = None
@@ -364,8 +382,7 @@ def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key
     # depeding on (1) that we have a currency in coin2 or not
     # and (2) if data is aggregated, we have to read entries2 from different collections
     # and in one case postprocess them
-    if collection_name is None and coin2_is_currency:
-
+    if coin2_is_currency:
         if collection_name is None:
             currencies_collection = 'currencies'
         else:
@@ -386,8 +403,6 @@ def get_aggregated_pair(coin1, coin2, time_start, time_end, number_of_ticks, key
     else:
         entries2 = MONGO_READER.get_raw_data(
             coin2, time_start, time_end, collection_name=collection_name)
-
-    # print "len(entries2) = ", len(entries2)
 
     meta = {}
     ticks = []
@@ -473,6 +488,9 @@ def aggregate_new_entries(coin):
 
     first_timestamp = MONGO_READER.get_first_timestamp(coin)
     last_timestamp = MONGO_READER.get_first_timestamp(coin, last=True)
+    if first_timestamp is None or last_timestamp is None:
+        _log_error("timestamp is None for %s" % coin)
+        return
 
     for interval_name, interval_size in INTERVAL.items():
         collection_name = collection_prefix + interval_name
@@ -480,11 +498,11 @@ def aggregate_new_entries(coin):
         last_aggregated_timestamp = \
             MONGO_READER.get_first_timestamp(coin, last=True, collection_name=collection_name)
         if last_aggregated_timestamp is None:
-            print "[%s/%s] last_aggregated_timestamp is None" % (collection_name, coin)
+            _log("[%s/%s] last_aggregated_timestamp is None" % (collection_name, coin))
             last_aggregated_timestamp = first_timestamp
-        print "[%s/%s] %s entries to insert/update" % \
+        _log("[%s/%s] %s entries to insert/update" % \
             (collection_name, coin,
-             int(math.ceil((last_timestamp - last_aggregated_timestamp)*1.0/interval_size)))
+             int(math.ceil((last_timestamp - last_aggregated_timestamp)*1.0/interval_size))))
 
         inserted_entries = 0
         timestamp = last_aggregated_timestamp
@@ -500,66 +518,98 @@ def aggregate_new_entries(coin):
             if entry:
                 MONGO_WRITER.update(entry, collection_name)
                 inserted_entries += 1
-                if entry['number_of_aggregated'] != interval_size/300:
-                    print "[%s/%s] entry[%s][number_of_aggregated] = %s" % \
-                        (collection_name, coin, inserted_entries, entry['number_of_aggregated'])
+                if entry['number_of_aggregated'] != interval_size/300 and DEBUG_LEVEL > 1:
+                    _log("[%s/%s] entry[%s][number_of_aggregated] = %s" % \
+                        (collection_name, coin, inserted_entries, entry['number_of_aggregated']))
             timestamp += interval_size
-        print "[%s/%s] Updated %s entries" % (collection_name, coin, inserted_entries)
+        _log("[%s/%s] Updated %s entries" % (collection_name, coin, inserted_entries))
 
-def do_coins():
-    """
-    Aggregator of existing entries
-    """
 
-    AGGREGATE_COINS = [
-        'BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'EOS',
-        'ADA', 'XLM', 'NEO', 'MIOTA', 'XMR',
-    ]
-    for coin in AGGREGATE_COINS: # ['BTC', 'ETH', 'XRP']:
-        aggregate_new_entries(coin)
-
-        first_timestamp = MONGO_READER.get_first_timestamp(coin)
-        last_timestamp = MONGO_READER.get_first_timestamp(coin, last=True)
-
-        for interval_name, interval_size in INTERVAL.items():
-            collection_name = 'coins_' + interval_name
-
-            last_aggregated_timestamp = \
-                MONGO_READER.get_first_timestamp(coin, last=True, collection_name=collection_name)
-            if last_aggregated_timestamp is None:
-                print "[%s/%s] last_aggregated_timestamp is None" % (collection_name, coin)
-                last_aggregated_timestamp = first_timestamp
-            print "[%s/%s] %s entries to insert/update" % \
-                (collection_name, coin,
-                 int(math.ceil((last_timestamp - last_aggregated_timestamp)*1.0/interval_size)))
-
-            inserted_entries = 0
-            timestamp = last_aggregated_timestamp
-            while timestamp <= last_timestamp:
-                entry = aggregate_coin(coin, timestamp, interval_size)
-                # we insert all entries except the last one,
-                # because it is possible that it is not yet completed
-                # therefore we insert entry first, and calculate a new one thereafter
-                if entry:
-                    MONGO_WRITER.update(entry, collection_name)
-                    inserted_entries += 1
-                    if entry['number_of_aggregated'] != interval_size/300:
-                        print "[%s/%s] entry[%s][number_of_aggregated] = %s" % \
-                            (collection_name, coin, inserted_entries, entry['number_of_aggregated'])
-                timestamp += interval_size
-            print "[%s/%s] Updated %s entries" % (collection_name, coin, inserted_entries)
+# we have blacklisted these coins, because there are some problems
+# with their aggregation. As soon as the code is fixed, the list has to be empty
+# (or at least it should much shorter than that)
+BLACKLISTED = """
+    B2B 2GIVE 1337 ERC20
+    I0C FC2 Q2C 42 C2 8BIT 888 611 $$$ MTLMC3
+    300 ASAFE2 VEC2 XBTC21 G3N CTIC3 CTIC2 P7C
+    ABJ ABN ABY AC ACC ACOIN ACP ADC ADL ADST
+    ADZ AERM AHT AIB ALL ALT ALTCOM AMMO AMS ANC
+    ANTI APW APX ARC ARCO ARDR ARG ARGUS ARI ART
+    ASAFE ASTRO ATL ATMS ATOM ATS ATX AUR AVT B
+    BAS BASH BBR BBT BCAP BCC BCF BCY BDL BELA
+    BENJI BERN BET BIGUP BIOB BIP BIS BIT BITBTC BITEUR
+    BITGOLD BITS BITSILVER BITZ BLAS BLC BLITZ BLN BLOCKPAY BLU
+    BLUE BNTY BNX BOAT BOLI BON BPC BPL BQ BRAIN
+    BRAT BRK BRO BRX BSTY BTA BTB BTCR BTCRED BTCS
+    BTCZ BTDX BTPL BTQ BTWTY BUCKS BUMBA BUN BUZZ BWK
+    BXT BYC C CAB CACH CAG CALC CANN CARBON CASH
+    CBX CCN CCO CCRB CCT CDN CDX CFD CFT CHAN
+    CHC CHESS CHIPS CJ CMPCO CNNC CNO CNT COAL CON
+    CONX COVAL CPN CRAVE CRB CRC CRDNC CREA CRED CREDO
+    CREVA CRM CRX CSNO CTIC CTX CUBE CURE CVCOIN CXT
+    CYP DAI DALC DAR DAXX DBTC DCY DDF DEM DFT
+    DGC DGCS DGPT DIBC DICE DIX DLC DLISK DMB DNR
+    DOLLAR DOPE DOT DOVU DP DRP DRS DRT DRXNE DSH
+    DSR DUO DYN EAC EAGLE EBCH EBET EBST EBT EBTC
+    ECN ECO ECOB EDR EFL EFYT EGAS EGC EGO EL
+    ELE ELIX ELLA ELS ELTCOIN EMD EMV ENT EOT EPY
+    EQT ERC EREAL ERO ERROR ERY ESP ETBS ETG ETHD
+    ETT EUC EVIL EVO EXCL EXN FAIR FC FCN FLAX
+    FLDC FLIK FLIXX FLT FNC FOR FRD FRST FST FUCK
+    FUNC FUNK FUZZ FXE FYN FYP G GAIA GAM GAP
+    GB GBX GCC GCN GEERT GEO GIM GIVE GLD GLT
+    GMT GP GPL GPU GRE GRID GRIM GRWI GSR GUN
+    HAL HAT HBN HBT HDG HEAT HERO HGT HKN HMP
+    HNC HODL HOLD HONEY HPC HTC HUC HUSH HVCO HWC
+    HXX HYP I IBANK ICE ICOB ICON ICOO IETH IFLT
+    IMPS IMS IMX IND INFX INN INSN INXT IOP ITI
+    ITNS IXC JET JIN JINN JNS JOBS KAYI KED KEK
+    KLC KLN KOBO KORE KRB KRONE KURT KUSH LANA LBTC
+    LCP LEA LGD LIFE LINDA LINX LNK LOC LTB LTCR
+    LTCU LUNA LUX LVPS MAC MAD MAG MAO MAR MARS
+    MAX MAY MBI MBRS MCAP MEC MEME MGM MILO MNC
+    MNE MNM MOIN MOJO MONK MOTO MRT MSCN MST MTLMC
+    MTNC MXT MYST MZC N NANOX NDC NETKO NEVA NEWB
+    NIO NKA NOBL NOTE NRO NSR NTO NTRN NTWK NUKO
+    NVC NVST NYAN NYC OBITS OCL OCT ODN OFF ONG
+    ONX OPAL OPT ORB ORLY OTN OTX OXY P PAK
+    PASL PAYX PBL PBT PCOIN PDC PEX PFR PGL PHS
+    PIGGY PING PINK PIRL PIX PKB PKT PLACO PLAY PLNC
+    PLU PND POLL PONZI POP POS POST PPY PR PRC
+    PRIX PROC PRX PTC PURE PUT PXC PXI PZM Q
+    QBC QCN QRK QTL QVT QWARK RBIES RBT RBY RC
+    REAL REC RED REE REX RIC RISE RKC RLT RMC
+    RNS ROC ROOFS RPC RUP RUSTBITS SAGA SCL SCS SDC
+    SDRN SEND SEQ SFC SGR SIFT SIGT SKC SKIN SLEVIN
+    SLFI SLG SMC SNRG SOCC SOIL SONG SOON SPACE SPHR
+    SPRTS SPT SRC SSS STA STAK STARS STN STRC STU
+    STV SUMO SUPER SWIFT SWING SXC SYNX TAG TAJ TALK
+    TCC TEK TES TFL TGC TGT TIPS TIT TKR TKS
+    TOA TOKEN TOR TRCT TRDT TRI TRIG TRK TROLL TRUMP
+    TRUST TSE TSTR TTC TX TZC UET UFO UFR UIS
+    ULA UNB UNIC UNIFY UNITS UNITY UNY URC URO USDE
+    USNBT UTC V VAL VEC VIDZ VISIO VIVO VLT VLTC
+    VOISE VOLT VOT VPRC VRM VRS VSL VSX VTA VTR
+    VUC WBB WDC WGO WHL WILD WISH WOMEN WORM WRC
+    WTT XBC XBL XBTC XBTS XCO XCPO XCRE XCS XCT
+    XCXT XFT XGOX XGR XHI XIOS XJO XLC XLR XMCC
+    XMG XNG XNN XPA XPD XPTX XPY XRA XRC XRE
+    XRL XST XTO XVC XVP YOC YTN ZCG ZEIT ZENI
+    ZEPH ZER ZET ZMC ZNY ZOI ZRC ZUR ZZC
+"""
 
 def main():
     """
     Aggregator of existing entries
     """
-    coins_to_aggregate = [
-        None,
-        'BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'EOS',
-        'ADA', 'XLM', 'NEO', 'MIOTA', 'XMR',
-    ]
+    blacklisted = set(BLACKLISTED.split())
+    coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
+
     for coin in coins_to_aggregate:
-        aggregate_new_entries(coin)
+        try:
+            aggregate_new_entries(coin)
+        except IndexError as e_msg:
+            _log_error("ERROR: coin: %s: %s" % (coin, e_msg))
 
 if __name__ == '__main__':
     main()
