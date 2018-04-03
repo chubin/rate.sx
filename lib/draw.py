@@ -2,9 +2,9 @@
 # encoding: utf-8
 
 """
- 1 [ ] update all coins data
+ 1 [X] update all coins data
  2 [X] currencies support
- 3 [ ] add update script to cron
+ 3 [X] add update script to cron
 
  4 [X] high alignment calculation
  5 [X] low alignment calculation
@@ -24,10 +24,10 @@
 17 [ ] terminal size
 18 [ ] json output
 
-19 [ ] readme update
-20 [ ]  intervals
-21 [ ]  url
-22 [ ]   screenshots
+19 [X] readme update
+20 [X]  intervals
+21 [X]  url
+22 [X]   screenshots
 23 [ ] help update
 
 24 [ ] commit
@@ -35,7 +35,7 @@
 25 [X] add nice colors
 26 [X] add message about @interval
 27 [X] add message about /help
-28 [ ] add the message to the main page
+28 [X] add the message to the main page
 29 [X] clean up the code, remove all warnings
 
 30 [X] support of small intervals
@@ -43,7 +43,7 @@
 
 32 [ ] fix the strange bug of diagram
 33 [ ] coin position change
-34 [ ] add a warning if interval is truncated
+34 [X] add a warning if interval is truncated
 35 [ ] add a warning if one of the currencies is overridden
 """
 
@@ -130,7 +130,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         self.width = self.options.get('width', 80)
         self.height = self.options.get('height', 25)
         self.palette = 0
-        self.warnings = []
+        self.warnings = self.options.get('warnings', [])
 
         self.interval = interval_pair[1] - interval_pair[0]
         self.currency = self.options.get('currency' or 'USD')
@@ -318,7 +318,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
         output = ""
         for line in self.warnings:
-            output += "WARNING: %s\n" % line
+            output += Fore.YELLOW + "WARNING: %s\n" % line + Style.RESET_ALL
 
         if self.options.get('msg_interval'):
             output += MSG_INTERVAL
@@ -419,11 +419,17 @@ def view(query, use_currency=None):
     #import json
     #print json.dumps(data['meta'], indent=True)
 
+    warnings = []
+    if data['meta']['time_begin'] - time_begin > 3600*24:
+        warnings.append(
+            "for the moment, rate.sx has historical data only starting from 2018-Jan-07")
+
     options = dict(
         width=80,
         height=25,
         msg_interval='@' not in query,
         currency=coin2 or 'USD',
+        warnings=warnings,
     )
     dia = Diagram(data, (time_begin, time_end), options=options)
     return dia.make_view()
