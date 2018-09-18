@@ -534,6 +534,7 @@ COINS_NAMES = (
     ("ZEPH", "Zephyr"),
     ("HUC", "HunterCoin"),
     ("DAI", "Dai"),
+    ("MKR", "Maker"),
     ("CDX", "Commodity Ad Network"),
     ("WAND", "WandX"),
     ("NOBL", "NobleCoin"),
