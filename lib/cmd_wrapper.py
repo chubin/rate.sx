@@ -73,7 +73,7 @@ def get_cmd_output(hostname, topic, request_options):
 
         use_currency = currency
         if currency not in currencies_names.SUPPORTED_CURRENCIES \
-            and currency not in currencies_names.CRYPTO_CURRENCIES + ['coin']:
+            and currency not in coins_names.COIN_NAMES_DICT and currency != 'coin':
             currency = 'USD'
 
         if topic != ':firstpage':

@@ -1008,10 +1008,11 @@ COINS_NAMES = (
 )
     # ("BTG", "Bitgem"),
 
+COIN_NAMES_DICT = dict(COINS_NAMES)
+
 def coin_name(symbol):
     """
     Return full name of the coin ``symbol``
     """
 
-    coin_name_dict = dict(COINS_NAMES)
-    return coin_name_dict.get(symbol, "")
+    return COIN_NAMES_DICT.get(symbol, "")
