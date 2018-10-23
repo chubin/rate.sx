@@ -1004,7 +1004,8 @@ COINS_NAMES = (
     ("ICOO", "ICO OpenLedger"),
     ("BUN", "BunnyCoin"),
     ("JNS", "Janus"),
-    ("XTZ", "Tezos"),  
+    ("XTZ", "Tezos"),
+    ("POLY", "Polymath"),
 )
     # ("BTG", "Bitgem"),
 
