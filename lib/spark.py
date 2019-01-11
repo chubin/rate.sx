@@ -1,5 +1,6 @@
 #vim:encoding=utf-8
 
+from __future__ import print_function
 import math
 from termcolor import colored
 
@@ -37,6 +38,6 @@ def spark(vals):
 
 if __name__ == '__main__':
     data = [1,-1,2,-2,3,-3,4,-4,5,-5]
-    print spark_numbers(data)
-    print spark(data)
+    print(spark_numbers(data))
+    print(spark(data))
 

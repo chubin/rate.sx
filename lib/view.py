@@ -46,7 +46,7 @@ def show(config):
                     (market_cap_direction, vol_24h_direction, btc_dominance_direction),
                     marktcap_spark)
 
-    except ValueError, e:
+    except ValueError as e:
         output = "ERROR: %s" % s
 
     return output
