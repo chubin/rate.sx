@@ -20,6 +20,11 @@ from wcwidth import wcswidth
 from colors import find_nearest_color, HEX_TO_ANSI, rgb_from_str
 import pyte
 
+try:
+    basestring     # Python 2
+except NameError:  # Python 3
+    basestring = (str, )
+
 # http://stackoverflow.com/questions/19782975/convert-rgb-color-to-the-nearest-color-in-palette-web-safe-color
 # pylint: disable=invalid-name
 
