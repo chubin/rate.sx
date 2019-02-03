@@ -79,13 +79,13 @@ def get_cmd_output(hostname, topic, request_options):
         if topic != ':firstpage':
             try:
                 answer = calculator.calculate(topic.upper(), currency)
-            except ValueError, e:
+            except ValueError as e:
                 return "ERROR: %s\n" % e
 
             if answer is None:
                 try:
                     answer = draw.view(topic, use_currency=use_currency)
-                except RuntimeError, e:
+                except RuntimeError as e:
                     return "ERROR: %s\n" % e
 
             if answer is not None:

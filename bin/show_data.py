@@ -5,11 +5,14 @@
 command line terminal rate.sx client
 """
 
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
 import os
+import sys
+try:
+    reload(sys)
+    sys.setdefaultencoding("utf-8")
+except NameError:
+    pass  # Python 3 already defaults to utf-8
+
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
 sys.path.append("%s/lib/" % MYDIR)
 

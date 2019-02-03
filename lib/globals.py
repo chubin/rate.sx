@@ -1,6 +1,7 @@
 """
 Global variables and most important functions.
 """
+from __future__ import print_function
 
 import logging
 import os
@@ -35,7 +36,7 @@ def error(text):
     Fatal error. Log ``text`` and produce a RuntimeException
     """
     if not text.startswith('Too many queries'):
-        print text
+        print(text)
     logging.error("ERROR %s", text)
     raise RuntimeError(text)
 
@@ -44,5 +45,5 @@ def log(text):
     Log ``text`` to the log and on the standard out and continue
     """
     if not text.startswith('Too many queries'):
-        print text
+        print(text)
         logging.info(text)
