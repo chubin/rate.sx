@@ -79,6 +79,8 @@ def get_cmd_output(hostname, topic, request_options):
         if topic != ':firstpage':
             try:
                 answer = calculator.calculate(topic.upper(), currency)
+                if answer:
+                    answer = 'text %s' % answer
             except ValueError, e:
                 return "ERROR: %s\n" % e
 
@@ -132,6 +134,10 @@ def cmd_wrapper(query, hostname=None, request_options=None, html=False):
         result = get_internal(query)
     else:
         result = get_cmd_output(hostname, query, request_options)
+
+    if result and result.startswith('text '):
+        result = result[5:]
+        html = False
 
     if html:
         result = "\n".join(result.splitlines()[:-1])
