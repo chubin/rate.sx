@@ -103,6 +103,7 @@ Example of an entry:
 import logging
 import math
 import os
+import time
 
 from currencies_names import currency_name
 from coins_names import COINS_NAMES
@@ -507,7 +508,11 @@ def aggregate_new_entries(coin):
         inserted_entries = 0
         timestamp = last_aggregated_timestamp
         while timestamp <= last_timestamp:
-            entry = aggregation_function(coin, timestamp, interval_size)
+            try:
+                entry = aggregation_function(coin, timestamp, interval_size)
+            except Exception as e_msg:
+                _log_error("ERROR: coin: %s: %s: %s" % (coin, time.strftime("%Y-%m-%d %H:%M", time.gmtime(timestamp)), e_msg))
+                entry = None
 
             #import json
             #print json.dumps(entry)
