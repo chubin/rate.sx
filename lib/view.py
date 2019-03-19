@@ -2,8 +2,11 @@ from mng import MongoReader
 from view_ansi import print_table
 
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+try:
+    reload(sys)
+    sys.setdefaultencoding("utf-8")
+except NameError:
+    pass  # Python 3 already defaults to utf-8
 
 def show(config):
     "main function"
@@ -46,8 +49,8 @@ def show(config):
                     (market_cap_direction, vol_24h_direction, btc_dominance_direction),
                     marktcap_spark)
 
-    except ValueError, e:
-        output = "ERROR: %s" % s
+    except ValueError as e:
+        output = "ERROR: %s" % e
 
     return output
         

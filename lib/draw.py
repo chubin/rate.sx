@@ -46,6 +46,7 @@
 34 [X] add a warning if interval is truncated
 35 [ ] add a warning if one of the currencies is overridden
 """
+from __future__ import print_function
 
 import sys
 import datetime
@@ -345,7 +346,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         """
         Show diagram on the standard output.
         """
-        print self.make_view()
+        print(self.make_view())
 
 def _split_query(query):
 
@@ -406,7 +407,7 @@ def view(query, use_currency=None):
             or currencies_names.currency_name(use_currency) != ''):
         coin2 = use_currency
 
-    print coin2
+    print(coin2)
     ticks = 80
     if coin2:
         data = aggregate.get_aggregated_pair(coin, coin2, time_begin, time_end, ticks)
@@ -445,7 +446,7 @@ def main():
     try:
         sys.stdout.write(view(query))
     except RuntimeError as e_msg:
-        print "ERROR: %s" % e_msg
+        print("ERROR: %s" % e_msg)
         sys.exit(1)
 
 
