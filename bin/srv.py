@@ -35,8 +35,8 @@ SKIP_LOGGING_FOR_THIS_IPS = set([
 ])
 
 from globals import FILE_QUERIES_LOG, LOG_FILE, TEMPLATES, STATIC, log, error
-
 from cmd_wrapper import cmd_wrapper
+from parse_query import parse_query
 
 if not os.path.exists(os.path.dirname(LOG_FILE)):
     os.makedirs(os.path.dirname(LOG_FILE))
@@ -53,31 +53,6 @@ def is_html_needed(user_agent):
     if any([x in user_agent for x in plaintext_clients]):
         return False
     return True
-
-def parse_args(args):
-    result = {}
-
-    q = ""
-    for key, val in args.items():
-        if len(val) == 0:
-            q += key
-            continue
-
-    if q is None:
-        return result
-    if 'T' in q:
-        result['no-terminal'] = True
-    if 'q' in q:
-        result['quiet'] = True
-
-    for key, val in args.items():
-        if val == 'True':
-            val = True
-        if val == 'False':
-            val = False
-        result[key] = val
-
-    return result
 
 @app.route('/files/<path:path>')
 def send_static(path):
@@ -113,7 +88,7 @@ def answer(topic = None):
 
     user_agent = request.headers.get('User-Agent', '').lower()
     html_needed = is_html_needed(user_agent)
-    options = parse_args(request.args)
+    options = parse_query(request.args)
     hostname = request.headers['Host']
 
     if request.headers.getlist("X-Forwarded-For"):
@@ -141,4 +116,3 @@ def answer(topic = None):
 
 server = WSGIServer(("", 8004), app) # log=None)
 server.serve_forever()
-
