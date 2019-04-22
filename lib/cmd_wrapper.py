@@ -30,6 +30,7 @@ import draw
 
 from globals import error, ANSI2HTML
 from buttons import TWITTER_BUTTON, GITHUB_BUTTON, GITHUB_BUTTON_FOOTER
+from utils import remove_ansi
 
 INTERNAL_TOPICS = [":help", ":currencies", ":coins"]
 
@@ -91,6 +92,8 @@ def get_cmd_output(hostname, topic, request_options):
                     return "ERROR: %s\n" % e
 
             if answer is not None:
+                if request_options.get('no-terminal'):
+                    answer = remove_ansi(answer)
                 open(cache_file, 'w').write(str(answer)+"\n")
                 return "%s\n" % answer
             else:
@@ -101,6 +104,9 @@ def get_cmd_output(hostname, topic, request_options):
     config = request_options
     config['currency'] = currency
     answer = view.show(config)
+
+    if config.get('no-terminal'):
+        answer = remove_ansi(answer)
 
     open(cache_file, 'w').write(answer)
     #p = Popen(cmd, stdout=PIPE, stderr=PIPE)
