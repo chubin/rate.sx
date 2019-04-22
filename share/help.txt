@@ -15,6 +15,7 @@ Options:
     ?OPTIONS
 
     q                   quiet mode, don't show header and footer (github/twitter buttons)
+    F                   do not show the "Follow" line
     T                   text only, no ANSI sequences
     n=NUMBER            number of cryptocurrencies to show (10 by default)
 

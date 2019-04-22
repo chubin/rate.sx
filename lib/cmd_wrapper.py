@@ -151,7 +151,7 @@ def cmd_wrapper(query, hostname=None, request_options=None, html=False):
         result = html_wrapper(result)
         title = "<title>rate.sx</title>"
         result = re.sub("<head>", "<head>" + title, result)
-        if not request_options.get('quiet'):
+        if not request_options.get('quiet') or not request_options.get('no-follow-line'):
             result = result.replace('</body>', TWITTER_BUTTON + GITHUB_BUTTON + GITHUB_BUTTON_FOOTER + '</body>')
 
     return result

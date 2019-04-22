@@ -115,7 +115,7 @@ def _colorize_frame(s_frame):
 # that's everything we need to save (and to load later)
 #
 
-def print_table(currency, data, directions, marktcap_spark): # pylint: disable=too-many-locals
+def print_table(currency, data, directions, marktcap_spark, config): # pylint: disable=too-many-locals
     """
     Generate main table. Use specified <currency> as the main unit.
     """
@@ -168,7 +168,9 @@ def print_table(currency, data, directions, marktcap_spark): # pylint: disable=t
     output += [_colorize_frame(table.table)]
     output += [Fore.WHITE + Style.DIM + "%s" % data['timestamp_now']  + Style.RESET_ALL]
     output += [""]
-    output += [MSG_NEW_FEATURE]
-    output += [MSG_FOLLOW_ME + MSG_GITHUB_BUTTON]
+
+    if not config.get('no-follow-line'):
+        output += [MSG_NEW_FEATURE]
+        output += [MSG_FOLLOW_ME + MSG_GITHUB_BUTTON]
 
     return "\n".join(output) + "\n"

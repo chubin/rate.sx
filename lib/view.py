@@ -47,11 +47,10 @@ def show(config):
                     config['currency'],
                     data,
                     (market_cap_direction, vol_24h_direction, btc_dominance_direction),
-                    marktcap_spark)
+                    marktcap_spark,
+                    config)
 
     except ValueError as e:
         output = "ERROR: %s" % e
 
     return output
-        
-
