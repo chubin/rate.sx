@@ -7,7 +7,7 @@ redis
 colored
 terminaltables
 colorama
-termdata
+termcolor
 PyYAML
 dateparser
 pylint
