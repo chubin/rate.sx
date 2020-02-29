@@ -169,15 +169,21 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
             """
             Find change (in percents) of <symbols> between <timestamp>-<timedelta> and <timestamp>
             """
-            price_before = self.coins\
-                .find({"symbol": symbol, "timestamp":{'$lt':timestamp-timedelta+1}}) \
-                .sort([("timestamp", -1)]) \
-                .limit(1)[0]['price_usd']
+            try:
+                price_before = self.coins\
+                    .find({"symbol": symbol, "timestamp":{'$lt':timestamp-timedelta+1}}) \
+                    .sort([("timestamp", -1)]) \
+                    .limit(1)[0]['price_usd']
+            except IndexError:
+                price_before = 0
 
             price_before = price_before*self.currency_factor(timestamp=timestamp-timedelta)
             price = price_usd*self.currency_factor(timestamp=timestamp)
 
-            return (price-price_before)*100/price_before
+            if price_before != 0:
+                return (price-price_before)*100/price_before
+            else:
+                return 0
 
         if timestamp is None:
             timestamp = self.coins \
