@@ -1,11 +1,14 @@
-gevent
+diagram
+colorclass~=1.1.2
+pymongo
+gevent~=1.2.2
 flask
 pygments
 requests
 dateutils
 redis
 colored
-terminaltables
+terminaltables~=1.2.1
 colorama
 termcolor
 PyYAML

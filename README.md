@@ -251,7 +251,7 @@ server {
     error_log  /var/log/nginx/rate.sx-error.log;
 
     location / {
-        proxy_pass         http://127.0.0.1:8003;
+        proxy_pass         http://127.0.0.1:8004;
 
         proxy_set_header   Host             $host;
         proxy_set_header   X-Real-IP        $remote_addr;
