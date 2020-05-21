@@ -97,13 +97,6 @@ def answer(topic = None):
            ip = ip[7:]
     else:
        ip = request.remote_addr
-    if request.headers.getlist("X-Forwarded-For"):
-       ip = request.headers.getlist("X-Forwarded-For")[0]
-       if ip.startswith('::ffff:'):
-           ip = ip[7:]
-    else:
-       ip = request.remote_addr
-
 
     if topic is None:
         topic = ":firstpage"
