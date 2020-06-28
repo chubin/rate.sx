@@ -162,7 +162,7 @@ You can specify some range in the past. There are three options for that:
 ```
 
 Don't afraid to be too inventive. If rate.sx can't parse your date, it will say about it.
-The toplevel intrval grammar is summarized below.
+The toplevel interval grammar is summarized below.
 
 ![rate.sx screenshot with plot and interval](http://rate.sx/files/screenshot-with-plot-and-interval.png)
 *In this output, exchange rate of IOTA (MIOTA) to Euro (EUR) in March 2018 is displayed.*
@@ -202,7 +202,7 @@ Though *rate.sx* synchronizes with online cryptocurrencies exchanges every five 
 we cannot guarantee absolute accuracy of the displayed exchange rates.
 You should always confirm current rates before making any transactions
 that could be affected by changes in the exchange rates.
-Crypocurrency rates based on the data provided by exchanges APIs.
+Cryptocurrency rates based on the data provided by exchanges APIs.
 All rates are for information purposes only and are subject to change without prior notice.
 Since rates for actual transactions may vary,
 we are not offering to enter into any transaction at any rate displayed.
@@ -243,7 +243,7 @@ ve/bin/python bin/srv.py
 
 Configure the web server, that will be used to access the service (if you want to use a web frontend; it's recommended):
 
-```
+```nginx
 server {
     listen [::]:80;
     server_name  rate.sx *.rate.sx;
