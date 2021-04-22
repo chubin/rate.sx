@@ -1011,6 +1011,8 @@ COINS_NAMES = (
     ("RVN",     "Ravencoin"),
     ("UBQ",     "Ubiq"),
     ("AVAX",    "Avalanche"),
+    ("HIVE",    "Hive"),
+    ("HBD",     "Hive Dollar"),
 )
     # ("BTG", "Bitgem"),
 
