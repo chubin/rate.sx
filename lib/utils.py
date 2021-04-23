@@ -10,3 +10,9 @@ def remove_ansi(sometext):
     """
     ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
     return ansi_escape.sub('', sometext)
+
+def remove_trailing_spaces(sometext):
+    sometext = sometext.replace('\x1B(B', "") # re_esc_b.sub("", sometext)
+
+    re_trailing_spaces = re.compile(r' *$', re.MULTILINE)
+    return re_trailing_spaces.sub("", sometext)
