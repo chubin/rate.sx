@@ -1006,6 +1006,9 @@ COINS_NAMES = (
     ("JNS", "Janus"),
     ("XTZ", "Tezos"),
     ("POLY", "Polymath"),
+    ("GRT", "The Graph"),
+    ("ARRR", "Pirate Chain"),
+    ("WOW", "Wownero"),
 
 # 2021-04-22 additions
     ("RVN",     "Ravencoin"),
