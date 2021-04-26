@@ -1016,6 +1016,8 @@ COINS_NAMES = (
     ("AVAX",    "Avalanche"),
     ("HIVE",    "Hive"),
     ("HBD",     "Hive Dollar"),
+
+    ("BAN",     "Banano"),
 )
     # ("BTG", "Bitgem"),
 
