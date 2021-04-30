@@ -1009,6 +1009,7 @@ COINS_NAMES = (
     ("GRT", "The Graph"),
     ("ARRR", "Pirate Chain"),
     ("WOW", "Wownero"),
+    ("SUTER", "Suter Token"),
 
 # 2021-04-22 additions
     ("RVN",     "Ravencoin"),
