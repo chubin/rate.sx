@@ -42,7 +42,7 @@ SYMBOL = {
     'KRW': '₩',
     'RUB': '₽',
     'MXN': '$',
-    'MYR': 'MR ',
+    'MYR': 'RM ',
     'NZD': '$',
     'PHP': '₱',
     'PLN': 'zł',
