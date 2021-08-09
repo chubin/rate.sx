@@ -1019,6 +1019,7 @@ COINS_NAMES = (
     ("HBD",     "Hive Dollar"),
 
     ("BAN",     "Banano"),
+    ("CFG",     "Centrifuge"),
 )
     # ("BTG", "Bitgem"),
 
