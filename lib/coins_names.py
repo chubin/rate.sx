@@ -1019,6 +1019,14 @@ COINS_NAMES = (
     ("HBD",     "Hive Dollar"),
 
     ("BAN",     "Banano"),
+
+# 2021-05-27 additions
+    ("FIL",     "Filecoin"),
+    ("UNI",     "Uniswap"),
+
+# 2021-09-19 additions
+    ("SOL",     "Solana"),
+    ("NEAR",    "NEAR Protocol"),
 )
     # ("BTG", "Bitgem"),
 
