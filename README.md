@@ -71,7 +71,7 @@ with another cryptocurrency, specify it in the domain name or after `/` in the q
 The time interval can be specified in many various ways. Though, most of them are intuitively clear,
 consult the Interval specification section just to see what interval formats are supported.
 
-You can the service in a web browser (though it is not its primary user interface),
+You can get the service in a web browser (though it is not its primary user interface),
 just type rate.sx in the location bar for that.
 
 

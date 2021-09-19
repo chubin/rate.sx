@@ -1027,6 +1027,7 @@ COINS_NAMES = (
 # 2021-09-19 additions
     ("SOL",     "Solana"),
     ("NEAR",    "NEAR Protocol"),
+    ("CFG",     "Centrifuge"),
 )
     # ("BTG", "Bitgem"),
 
