@@ -386,13 +386,7 @@ def _parse_query(query):
 
     return coin, coin2, time_begin, time_end
 
-def view(query, use_currency=None):
-    """
-    Main rendering function, entry point for this module.
-    Returns rendered view for the ``query``.
-    If currency is specified in ``query``, it overrides ``currency``.
-    If ``currency`` is not specified, USD is used.
-    """
+def get_data(query, use_currency=None):
 
     try:
         coin, coin2, time_begin, time_end = _parse_query(query)
@@ -407,12 +401,28 @@ def view(query, use_currency=None):
             or currencies_names.currency_name(use_currency) != ''):
         coin2 = use_currency
 
-    print(coin2)
     ticks = 80
     if coin2:
         data = aggregate.get_aggregated_pair(coin, coin2, time_begin, time_end, ticks)
     else:
         data = aggregate.get_aggregated_coin(coin, time_begin, time_end, ticks)
+
+    return data
+
+def view(query, use_currency=None):
+    """
+    Main rendering function, entry point for this module.
+    Returns rendered view for the ``query``.
+    If currency is specified in ``query``, it overrides ``currency``.
+    If ``currency`` is not specified, USD is used.
+    """
+
+    try:
+        coin, coin2, time_begin, time_end = _parse_query(query)
+    except SyntaxError as e_msg:
+        raise RuntimeError("%s" % e_msg)
+
+    data = get_data(query, use_currency=use_currency)
 
     if data['ticks'] == []:
         raise RuntimeError("No data found for your query. Wrong range?")
@@ -444,7 +454,9 @@ def main():
         query = sys.argv[1]
 
     try:
-        sys.stdout.write(view(query))
+        import json
+        sys.stdout.write(json.dumps(get_data(query)))
+        # sys.stdout.write(view(query))
     except RuntimeError as e_msg:
         print("ERROR: %s" % e_msg)
         sys.exit(1)
