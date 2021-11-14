@@ -1028,6 +1028,7 @@ COINS_NAMES = (
     ("SOL",     "Solana"),
     ("NEAR",    "NEAR Protocol"),
     ("CFG",     "Centrifuge"),
+    ("PAXG",    "PAX Gold"),
 )
     # ("BTG", "Bitgem"),
 
