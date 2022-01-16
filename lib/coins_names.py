@@ -1029,6 +1029,9 @@ COINS_NAMES = (
     ("NEAR",    "NEAR Protocol"),
     ("CFG",     "Centrifuge"),
     ("PAXG",    "PAX Gold"),
+
+    ("MATIC",   "Polygon"),
+    ("ALGO",    "Algorand"),
 )
     # ("BTG", "Bitgem"),
 
