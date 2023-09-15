@@ -1033,6 +1033,9 @@ COINS_NAMES = (
     ("MATIC",   "Polygon"),
     ("ALGO",    "Algorand"),
     ("BETH",    "Beacon ETH"),
+
+# 2023-09-15 additions
+    ("XCH",     "Chia"),
 )
     # ("BTG", "Bitgem"),
 
