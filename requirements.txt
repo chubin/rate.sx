@@ -14,4 +14,5 @@ termcolor
 PyYAML
 dateparser
 pylint
+werkzeug>=3.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
 urllib3>=2.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
