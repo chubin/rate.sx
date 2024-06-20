@@ -1,7 +1,7 @@
 diagram
 colorclass~=1.1.2
 pymongo
-gevent~=1.2.2
+gevent~=23.9.0
 flask
 pygments
 requests
@@ -15,3 +15,4 @@ PyYAML
 dateparser
 pylint
 werkzeug>=3.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=2.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
