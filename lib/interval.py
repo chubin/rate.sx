@@ -1,4 +1,3 @@
-
 """
 Interval functions.
 
@@ -50,23 +49,25 @@ from dateutil.relativedelta import relativedelta
 import dateparser
 
 INTERVAL_LENGTH = {
-    's': 1,
-    'm': 60,
-    'h': 3600,
-    'd': 24*3600,
-    'w': 7*24*3600,
-    'M': 30*24*3600,
-    'y': 365*24*3600,
+    "s": 1,
+    "m": 60,
+    "h": 3600,
+    "d": 24 * 3600,
+    "w": 7 * 24 * 3600,
+    "M": 30 * 24 * 3600,
+    "y": 365 * 24 * 3600,
 }
 
 
 def _epoch(dt_tuple):
     return calendar.timegm(dt_tuple.timetuple())
 
+
 def _parse_datetime(date_time):
     if date_time == "":
         return datetime.datetime.now()
     return dateparser.parse(date_time)
+
 
 def parse_datetime(date_time, now=None):
     """
@@ -79,6 +80,7 @@ def parse_datetime(date_time, now=None):
     if parsed:
         return _epoch(parsed)
     return None
+
 
 def from_secs(secs):
     """
@@ -124,10 +126,10 @@ def parse_length(length):
     sum_ = 0
     joined = ""
     letters = "".join(INTERVAL_LENGTH.keys())
-    for number, int_spec in re.findall('([0-9]+)([%s])' % letters, length):
+    for number, int_spec in re.findall("([0-9]+)([%s])" % letters, length):
         joined += number + int_spec
         try:
-            sum_ += int(number)*INTERVAL_LENGTH[int_spec]
+            sum_ += int(number) * INTERVAL_LENGTH[int_spec]
         except KeyError:
             return None
 
@@ -139,7 +141,10 @@ def parse_length(length):
 
     return sum_
 
-def parse_interval(interval_string, now=None):    # pylint: disable=too-many-branches,too-many-return-statements
+
+def parse_interval(
+    interval_string, now=None
+):  # pylint: disable=too-many-branches,too-many-return-statements
     """
     Parse ``interval_string`` and return a pair of timestamps
     in seconds since EPOCH
@@ -165,10 +170,10 @@ def parse_interval(interval_string, now=None):    # pylint: disable=too-many-bra
     #
     # Parsing DATETIME..[DATETIME]
     #
-    separator_index = interval_string.rfind('..')
+    separator_index = interval_string.rfind("..")
     if separator_index != -1:
         first = interval_string[:separator_index]
-        second = interval_string[separator_index+2:]
+        second = interval_string[separator_index + 2 :]
         return parse_datetime(first), parse_datetime(second)
 
     #
@@ -177,23 +182,23 @@ def parse_interval(interval_string, now=None):    # pylint: disable=too-many-bra
     #         DATETIME-[LENGTH]
     #
     operator = None
-    separator_index = interval_string.rfind('+-')
+    separator_index = interval_string.rfind("+-")
     if separator_index != -1:
-        operator = '+-'
+        operator = "+-"
     else:
-        separator_index = interval_string.rfind('+')
+        separator_index = interval_string.rfind("+")
         if separator_index != -1:
-            operator = '+'
+            operator = "+"
         else:
-            separator_index = interval_string.rfind('-')
+            separator_index = interval_string.rfind("-")
             if separator_index != -1:
                 # we accept this string only if LENGTH can be parsed as LENGTH
-                if parse_length(interval_string[separator_index+1:]):
-                    operator = '-'
+                if parse_length(interval_string[separator_index + 1 :]):
+                    operator = "-"
 
     if operator is not None:
         first = interval_string[:separator_index]
-        second = interval_string[separator_index+len(operator):]
+        second = interval_string[separator_index + len(operator) :]
 
         length = parse_length(second)
         if length is None:
@@ -203,11 +208,11 @@ def parse_interval(interval_string, now=None):    # pylint: disable=too-many-bra
         if given_date is None:
             raise SyntaxError("Can't parse date/time: %s" % first)
 
-        if operator == '-':
+        if operator == "-":
             return given_date - length, given_date
-        if operator == '+':
+        if operator == "+":
             return given_date, given_date + length
-        if operator == '+-':
+        if operator == "+-":
             return given_date - length, given_date + length
 
     #
@@ -216,23 +221,24 @@ def parse_interval(interval_string, now=None):    # pylint: disable=too-many-bra
     length = parse_length(interval_string)
     if length is not None:
         now = parse_datetime("", now=now)
-        return now-length, now
+        return now - length, now
 
     #
     # Parsing DATETIME
     #
     parsed = _parse_datetime(interval_string)
     if parsed is not None:
-        if dateparser.parse(interval_string,
-                            settings={'RELATIVE_BASE':datetime.datetime(1, 1, 1)}) != \
-           dateparser.parse(interval_string,
-                            settings={'RELATIVE_BASE':datetime.datetime(1, 1, 2)}):
+        if dateparser.parse(
+            interval_string, settings={"RELATIVE_BASE": datetime.datetime(1, 1, 1)}
+        ) != dateparser.parse(
+            interval_string, settings={"RELATIVE_BASE": datetime.datetime(1, 1, 2)}
+        ):
             delta = relativedelta(months=1)
         elif parsed.hour == 0:
             delta = relativedelta(days=1)
         elif parsed.minute == 0:
             delta = relativedelta(hours=1)
 
-        return _epoch(parsed), _epoch(parsed+delta)
+        return _epoch(parsed), _epoch(parsed + delta)
 
     return None, None
