@@ -37,6 +37,7 @@ For example, to convert 10 Bitcoins (BTC) into US Dollars do:
   $ curl rate.sx/10BTC
 ```
 
+(WARNING: This feature is currently not supported. See https://github.com/chubin/rate.sx/issues/70)
 You can also combine different currencies and cryptocurrencies in the same query:
 
 ```
