@@ -152,7 +152,7 @@ def html_wrapper(data):
     data = data.encode("utf-8")
     stdout, stderr = p.communicate(data)
     if p.returncode != 0:
-        error(stdout + stderr)
+        error((stdout + stderr).decode("utf-8"))
     return stdout.decode("utf-8")
 
 
