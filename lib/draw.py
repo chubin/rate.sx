@@ -328,7 +328,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         lines = [high_line] + ostream.getvalue().splitlines() + [low_line]
 
         output = ""
-        output += "\n".join([f"  │ {x}"or x in lines])
+        output += "\n".join([f"  │ {x}" for x in lines])
         output += "\n  └" + "─" * 80
 
         return output

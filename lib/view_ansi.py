@@ -161,10 +161,11 @@ def print_table(
         f"Market Cap ({currency})",
         "Spark (1H)",
     ]
+
+    table_data = [[colored(x, "yellow") for x in header]] + _colorize_entries(data["data"])
     table_class = WindowsTable
-    table = table_class(
-        [[colored(x, "yellow") for x in header]] + _colorize_entries(data["data"])
-    )
+    table = table_class(table_data)
+
     table.inner_row_border = True
 
     header = HEADER.replace("Z" * 48, marktcap_spark)
