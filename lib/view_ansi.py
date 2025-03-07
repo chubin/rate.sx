@@ -55,7 +55,9 @@ def human_format(num: float) -> str:
     return f"{num:.3f}{['', 'K', 'M', 'B', 'T', 'Q'][magnitude]}"
 
 
-def _colorize_entries(entries: List[Dict[str, Union[str, float, List[float]]]]) -> List[List[str]]:
+def _colorize_entries(
+    entries: List[Dict[str, Union[str, float, List[float]]]],
+) -> List[List[str]]:
     """
     Colorize table <entries>
     """
@@ -122,7 +124,18 @@ def _colorize_frame(s_frame: str) -> str:
 
 
 def print_table(
-    currency: str, data: Dict[str, Union[List[Dict[str, Union[str, float, List[float]]]], Dict[str, Union[int, float]], str]], directions: Tuple[int, int, int], marktcap_spark: str, config: Dict[str, Union[int, str]]
+    currency: str,
+    data: Dict[
+        str,
+        Union[
+            List[Dict[str, Union[str, float, List[float]]]],
+            Dict[str, Union[int, float]],
+            str,
+        ],
+    ],
+    directions: Tuple[int, int, int],
+    marktcap_spark: str,
+    config: Dict[str, Union[int, str]],
 ) -> str:  # pylint: disable=too-many-locals
     """
     Generate main table. Use specified <currency> as the main unit.
@@ -162,7 +175,9 @@ def print_table(
         "Spark (1H)",
     ]
 
-    table_data = [[colored(x, "yellow") for x in header]] + _colorize_entries(data["data"])
+    table_data = [[colored(x, "yellow") for x in header]] + _colorize_entries(
+        data["data"]
+    )
     table_class = WindowsTable
     table = table_class(table_data)
 
