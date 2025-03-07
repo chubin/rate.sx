@@ -1,0 +1,62 @@
+--- terminaltables.py	2025-03-07 12:00:39.261660570 +0100
++++ terminaltables.py.FIXED	2025-03-07 12:00:47.265958415 +0100
+@@ -23,6 +23,7 @@
+ import struct
+ import sys
+ import unicodedata
++from typing import Pattern
+ 
+ try:
+     import fcntl
+@@ -38,6 +39,23 @@
+ __version__ = '1.2.1'
+ 
+ 
++def _remove_invisible_ansi_chars(input_string: str) -> str:
++    """Removes all invisible ANSI characters from the input string.
++
++    This function removes ANSI escape sequences that are used for
++    formatting text in terminals, such as changing color, font, or
++    moving the cursor, and returns a string containing only visible characters.
++
++    Args:
++        input_string: A string that may contain invisible ANSI characters.
++
++    Returns:
++        A string with all ANSI escape sequences removed, containing only visible characters.
++
++    """
++    ansi_escape_pattern: Pattern = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
++    return ansi_escape_pattern.sub('', input_string)
++
+ def _get_width(string):
+     """Get the real width of unicode string.
+ 
+@@ -55,6 +73,8 @@
+         # Convert to unicode.
+         string = string.decode('u8')
+ 
++    string = _remove_invisible_ansi_chars(string)
++
+     width = 0
+     for char in string:
+         if unicodedata.east_asian_width(char) in ('F', 'W'):
+@@ -237,7 +257,8 @@
+             for i in range(len(row)):
+                 if not row[i]:
+                     continue
+-                widths[i] = max(widths[i], _get_width(max(row[i].splitlines(), key=len)))
++                row_i = str(row[i])
++                widths[i] = max(widths[i], _get_width(max(row_i.splitlines(), key=len)))
+ 
+         return widths
+ 
+@@ -262,7 +283,7 @@
+         # Pad strings in each cell, and apply text-align/justification.
+         column_widths = self.column_widths
+         for row in new_table_data:
+-            height = max([c.count('\n') for c in row] or [0]) + 1
++            height = max([("" if type(c) == type(1) else c).count('\n') for c in row] or [0]) + 1
+             for i in range(len(row)):
+                 align = self.justify_columns.get(i, 'left')
+                 cell = _align_and_pad(row[i], align, column_widths[i], height, self.padding_left, self.padding_right)

@@ -1,0 +1,11 @@
+--- colorclass.py	2025-03-07 12:00:38.449630358 +0100
++++ colorclass.py.FIXED	2025-03-07 12:00:47.269958564 +0100
+@@ -9,7 +9,7 @@
+ """
+ 
+ import atexit
+-from collections import Mapping
++from collections.abc import Mapping
+ import ctypes
+ import os
+ import re

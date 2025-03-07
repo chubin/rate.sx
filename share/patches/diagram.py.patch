@@ -1,0 +1,11 @@
+--- diagram.py	2025-03-07 12:00:38.381627829 +0100
++++ diagram.py.FIXED	2025-03-07 12:00:47.265958415 +0100
+@@ -691,7 +691,7 @@
+     def null(self):
+         """Zero crossing value."""
+         if not self.option.axis:
+-            return -1
++            return -4
+         else:
+             return self.screen.height - (
+                 -self.minimum * 4.0 / self.extents * self.size.y
