@@ -21,7 +21,7 @@ import json
 import hashlib
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
-sys.path.append("%s/lib/" % MYDIR)
+sys.path.append(f"{MYDIR}/lib/")
 import currencies_names
 import calculator
 
@@ -40,7 +40,7 @@ def show_currencies():
     return (
         "\n".join(
             [
-                "%-6s %s" % (x, currencies_names.CURRENCY_NAME[x])
+                f"{x:6} {currencies_names.CURRENCY_NAME[x]}"
                 for x in currencies_names.SUPPORTED_CURRENCIES
             ]
         )
@@ -49,7 +49,7 @@ def show_currencies():
 
 
 def show_coins():
-    return "\n".join(["%-6s %s" % (x, y) for (x, y) in coins_names.COINS_NAMES]) + "\n"
+    return "\n".join([f"{x:6} {y}" for (x, y) in coins_names.COINS_NAMES]) + "\n"
 
 
 def get_internal(topic):
@@ -73,7 +73,7 @@ def get_cmd_output(hostname, topic, request_options):
 
     digest = get_digest({"h": hostname, "t": topic, "r": request_options})
 
-    cache_file = "%s/cache/%s" % (MYDIR, digest)
+    cache_file = f"{MYDIR}/cache/{digest}"
     if os.path.exists(cache_file):
         return open(cache_file).read()
     # elif hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
@@ -98,27 +98,27 @@ def get_cmd_output(hostname, topic, request_options):
             try:
                 answer = calculator.calculate(topic.upper(), currency)
                 if answer:
-                    answer = "text %s" % answer
+                    answer = f"text {answer}"
             except ValueError as e:
-                return "ERROR: %s\n" % e
+                return f"ERROR: {e}\n"
 
             if answer is None:
                 try:
                     answer = draw.view(topic, use_currency=currency)
                 except RuntimeError as e:
-                    return "ERROR: %s\n" % e
+                    return f"ERROR: {e}\n"
 
             if answer is not None:
                 if request_options.get("no-terminal"):
                     answer = remove_trailing_spaces(remove_ansi(answer))
                 open(cache_file, "w").write(str(answer) + "\n")
-                return "%s\n" % answer
+                return f"{answer}\n"
             else:
-                return "ERROR: Can't parse your query: %s\n" % topic
+                return f"ERROR: Can't parse your query: {topic}\n"
 
         cmd = [
-            "%s/ve/bin/python" % MYDIR,
-            "%s/bin/show_data.py" % MYDIR,
+            f"{MYDIR}/ve/bin/python",
+            f"{MYDIR}/bin/show_data.py",
             currency,
             topic,
         ]

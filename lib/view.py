@@ -46,7 +46,7 @@ def show(config):
         )
 
     except ValueError as e:
-        output = "ERROR: %s" % e
+        output = f"ERROR: {e}"
 
     return output
 

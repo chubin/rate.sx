@@ -102,7 +102,7 @@ def from_secs(secs):
         number_of_subintervals = secs / size
         secs = secs % size
         if number_of_subintervals:
-            result += "%s%s" % (number_of_subintervals, name)
+            result += f"{number_of_subintervals}{name}"
     return result
 
 
@@ -126,7 +126,7 @@ def parse_length(length):
     sum_ = 0
     joined = ""
     letters = "".join(INTERVAL_LENGTH.keys())
-    for number, int_spec in re.findall("([0-9]+)([%s])" % letters, length):
+    for number, int_spec in re.findall(f"([0-9]+)([{letters}])", length):
         joined += number + int_spec
         try:
             sum_ += int(number) * INTERVAL_LENGTH[int_spec]
@@ -202,11 +202,11 @@ def parse_interval(
 
         length = parse_length(second)
         if length is None:
-            raise SyntaxError("Can't parse interval: %s" % second)
+            raise SyntaxError(f"Can't parse interval: {second}")
 
         given_date = parse_datetime(first, now=now)
         if given_date is None:
-            raise SyntaxError("Can't parse date/time: %s" % first)
+            raise SyntaxError(f"Can't parse date/time: {first}")
 
         if operator == "-":
             return given_date - length, given_date

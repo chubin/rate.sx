@@ -9,7 +9,7 @@ import datetime
 from pymongo import MongoClient, ASCENDING
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
-sys.path.append("%s/lib/" % MYDIR)
+sys.path.append(f"{MYDIR}/lib/")
 
 # pylint: disable=wrong-import-position
 import currencies_names
@@ -83,7 +83,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
                     .limit(1)[0]["price_usd"]
                 )
             except IndexError:
-                raise ValueError("Unknown coin/currency: %s" % currency)
+                raise ValueError(f"Unknown coin/currency: {currency}")
         else:
             query.update({currency: {"$exists": True}})
             try:
@@ -93,7 +93,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
                     .limit(1)[0][currency]
                 )
             except IndexError:
-                raise ValueError("Unknown currency: %s" % currency)
+                raise ValueError(f"Unknown currency: {currency}")
 
         # we use cache only if timestamp is specified
         if timestamp:
@@ -284,7 +284,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
         return {
             "data": self.mng_load_coins_data(),
             "marketcap_global_data": self.mng_load_marketcap_global_data(),
-            "timestamp_now": "%s UTC" % datetime.datetime.utcnow(),
+            "timestamp_now": f"{datetime.datetime.utcnow()} UTC",
         }
 
     def get_raw_data(
@@ -370,7 +370,7 @@ class MongoWriter(object):
             if collection_name in self.allowed_collections:
                 coins = self.client.ratesx[collection_name]
             else:
-                raise KeyError("Not allowed collection name: %s" % collection_name)
+                raise KeyError(f"Not allowed collection name: {collection_name}")
         else:
             coins = self.coins
 

@@ -117,7 +117,7 @@ INTERVAL = {
 DEBUG_LEVEL = 0
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
-LOGFILE = "%s/log/aggregate.log" % MYDIR
+LOGFILE = f"{MYDIR}/log/aggregate.log"
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
     filename=LOGFILE,
@@ -287,7 +287,7 @@ def get_aggregated_coin(
     # if interval is so small, we need to use the raw and not the aggregated data
     collection_name = None
     if chosen_interval:
-        collection_name = "coins_%s" % chosen_interval
+        collection_name = f"coins_{chosen_interval}"
 
     entries = MONGO_READER.get_raw_data(
         coin, time_start, time_end, collection_name=collection_name
@@ -387,7 +387,7 @@ def get_aggregated_pair(
     # if interval is so small, we need to use the raw and not the aggregated data
     collection_name = None
     if chosen_interval:
-        collection_name = "coins_%s" % chosen_interval
+        collection_name = f"coins_{chosen_interval}"
 
     if key is None:
         key = "price_usd"
@@ -511,7 +511,7 @@ def aggregate_new_entries(coin):
     first_timestamp = MONGO_READER.get_first_timestamp(coin)
     last_timestamp = MONGO_READER.get_first_timestamp(coin, last=True)
     if first_timestamp is None or last_timestamp is None:
-        _log_error("timestamp is None for %s" % coin)
+        _log_error(f"timestamp is None for {coin}")
         return
 
     import time
@@ -523,7 +523,7 @@ def aggregate_new_entries(coin):
             coin, last=True, collection_name=collection_name
         )
         if last_aggregated_timestamp is None:
-            _log("[%s/%s] last_aggregated_timestamp is None" % (collection_name, coin))
+            _log(f"[{collection_name}/{coin}] last_aggregated_timestamp is None")
             last_aggregated_timestamp = first_timestamp
         _log(
             "[%s/%s] %s entries to insert/update"
@@ -573,7 +573,7 @@ def aggregate_new_entries(coin):
                         )
                     )
             timestamp += interval_size
-        _log("[%s/%s] Updated %s entries" % (collection_name, coin, inserted_entries))
+        _log(f"[{collection_name}/{coin}] Updated {inserted_entries} entries")
 
 
 # we have blacklisted these coins, because there are some problems
@@ -662,7 +662,7 @@ def main():
         try:
             aggregate_new_entries(coin)
         except IndexError as e_msg:
-            _log_error("ERROR: coin: %s: %s" % (coin, e_msg))
+            _log_error(f"ERROR: coin: {coin}: {e_msg}")
 
 
 if __name__ == "__main__":

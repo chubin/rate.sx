@@ -60,7 +60,7 @@ import diagram
 from colorama import Fore, Back, Style
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
-sys.path.append("%s/lib/" % MYDIR)
+sys.path.append(f"{MYDIR}/lib/")
 
 # pylint: disable=wrong-import-position
 import aggregate
@@ -117,7 +117,7 @@ def _format_value(value, precision=3, show_plus=False):
 
 
 def _format_percentage(value):
-    res = "%.2f%%" % value
+    res = f"{value:.2f}%"
     if value > 0:
         res = "+" + res
     return res
@@ -190,8 +190,8 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         if not isinstance(value, str):
             value = _format_value(value)
         if self.currency_symbol:
-            return "%s%s" % (self.currency_symbol, value)
-        return "%s %s" % (value, self.currency)
+            return f"{self.currency_symbol}{value}"
+        return f"{value} {self.currency}"
 
     def _show_change_percentage(self):
         f_p = _format_percentage
@@ -208,10 +208,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
         meta = self.data["meta"]
         interval_name = interval.from_secs(self.interval)
-        time_interval = "%s +%s" % (
-            self._format_time(meta["time_begin"]),
-            interval_name,
-        )
+        time_interval = f"{self._format_time(meta['time_begin'])} +{interval_name}"
         # self._format_time(meta['time_end'], show_date=True, show_time=True),
 
         output = "\n"
@@ -230,8 +227,8 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
                 currency_symbol,
             )
         # output += u"{1%s (%s)}," % (coin_name, coin_symbol)
-        output += " %s" % (time_interval)
-        output += " %s\n" % self._show_change_percentage()[1]
+        output += f" {time_interval}"
+        output += f" {self._show_change_percentage()[1]}\n"
         output += "\n\n"
 
         return output
@@ -331,7 +328,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         lines = [high_line] + ostream.getvalue().splitlines() + [low_line]
 
         output = ""
-        output += "\n".join(["  │ %s" % x for x in lines])
+        output += "\n".join([f"  │ {x}"or x in lines])
         output += "\n  └" + "─" * 80
 
         return output
@@ -340,7 +337,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
         output = ""
         for line in self.warnings:
-            output += Fore.YELLOW + "WARNING: %s\n" % line + Style.RESET_ALL
+            output += Fore.YELLOW + f"WARNING: {line}\n" + Style.RESET_ALL
 
         if self.options.get("msg_interval"):
             output += MSG_INTERVAL
@@ -393,23 +390,23 @@ def _parse_query(query):
         coin, coin2 = coin.split("/", 1)
 
     if coins_names.coin_name(coin) == "" and currencies_names.currency_name(coin) == "":
-        raise SyntaxError("Invalid coin/currency name: %s" % coin)
+        raise SyntaxError(f"Invalid coin/currency name: {coin}")
 
     if (
         coin2
         and coins_names.coin_name(coin2) == ""
         and currencies_names.currency_name(coin2) == ""
     ):
-        raise SyntaxError("Invalid coin/currency name: %s" % coin2)
+        raise SyntaxError(f"Invalid coin/currency name: {coin2}")
 
     try:
         time_begin, time_end = interval.parse_interval(interval_string)
     except OverflowError:
         # to be fixed: ranges like yesterday, today, now and so on
-        raise RuntimeError("Wrong range specification: %s" % interval_string)
+        raise RuntimeError(f"Wrong range specification: {interval_string}")
 
     if time_begin is None or time_end is None:
-        raise SyntaxError("Invalid time interval specification: %s" % interval_string)
+        raise SyntaxError(f"Invalid time interval specification: {interval_string}")
 
     return coin, coin2, time_begin, time_end
 
@@ -419,7 +416,7 @@ def get_data(query, use_currency=None):
     try:
         coin, coin2, time_begin, time_end = _parse_query(query)
     except SyntaxError as e_msg:
-        raise RuntimeError("%s" % e_msg)
+        raise RuntimeError(f"{e_msg}")
 
     # if currency is specified in the domain name (use_currency)
     # but not in the query, then we use it as the output currency
@@ -453,7 +450,7 @@ def view(query, use_currency=None):
     try:
         coin, coin2, time_begin, time_end = _parse_query(query)
     except SyntaxError as e_msg:
-        raise RuntimeError("%s" % e_msg)
+        raise RuntimeError(f"{e_msg}")
 
     if not coin2 and use_currency:
         coin2 = use_currency
@@ -497,7 +494,7 @@ def main():
         # sys.stdout.write(json.dumps(get_data(query)))
         sys.stdout.write(view(query))
     except RuntimeError as e_msg:
-        print("ERROR: %s" % e_msg)
+        print(f"ERROR: {e_msg}")
         sys.exit(1)
 
 

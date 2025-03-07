@@ -14,7 +14,7 @@ from colorama import Fore, Style
 from termcolor import colored
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
-sys.path.append("%s/lib/" % MYDIR)
+sys.path.append(f"{MYDIR}/lib/")
 
 # pylint: disable=wrong-import-position
 from to_precision import to_precision
@@ -51,7 +51,7 @@ def human_format(num):
         magnitude += 1
         num /= 1000.0
     # add more suffixes if you need them
-    return "%.3f%s" % (num, ["", "K", "M", "B", "T", "Q"][magnitude])
+    return f"{num:.3f}{['', 'K', 'M', 'B', 'T', 'Q'][magnitude]}"
 
 
 def _colorize_entries(entries):
@@ -70,10 +70,10 @@ def _colorize_entries(entries):
         s_spark = spark.spark(entry["spark"])
 
         if change_24h != "-":
-            change_24h = colorize_number("%.2f%%" % change_24h)
+            change_24h = colorize_number(f"{change_24h:.2f}%")
 
         if change_1h != "-":
-            change_1h = colorize_number("%.2f%%" % change_1h)
+            change_1h = colorize_number(f"{change_1h:.2f}%")
 
         code = colored(code, "cyan")
         price = colored(to_precision(price, 6), "cyan")
@@ -147,17 +147,17 @@ def print_table(
     vol_24h += " " + colorize_direction(vol_24h_direction)
 
     btc_dominance = (
-        "%2.1f%%" % data["marketcap_global_data"]["bitcoin_percentage_of_market_cap"]
+        f"{data['marketcap_global_data']['bitcoin_percentage_of_market_cap']:2.1f}%"
     )
     btc_dominance += " " + colorize_direction(btc_dominance_direction)
 
     header = [
         "Rank",
         "Coin",
-        "Price (%s)" % currency,
+        f"Price ({currency})",
         "Change (24H)",
         "Change (1H)",
-        "Market Cap (%s)" % currency,
+        f"Market Cap ({currency})",
         "Spark (1H)",
     ]
     table_class = WindowsTable
@@ -171,11 +171,10 @@ def print_table(
     output = []
     output += [colored("\n".join(header.splitlines()[1:]) + "\n", "green")]
     output += [
-        "Market Cap: %s\n24h Vol: %s\nBTC Dominance: %s"
-        % (market_cap, vol_24h, btc_dominance)
+        f"Market Cap: {market_cap}\n24h Vol: {vol_24h}\nBTC Dominance: {btc_dominance}"
     ]
     output += [_colorize_frame(table.table)]
-    output += [Fore.WHITE + Style.DIM + "%s" % data["timestamp_now"] + Style.RESET_ALL]
+    output += [Fore.WHITE + Style.DIM + f"{data['timestamp_now']}" + Style.RESET_ALL]
     output += [""]
 
     if not config.get("no-follow-line"):

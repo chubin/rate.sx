@@ -22,7 +22,7 @@ Exported functions:
 """
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
-sys.path.append("%s/lib/" % MYDIR)
+sys.path.append(f"{MYDIR}/lib/")
 
 from mng import MongoReader
 
