@@ -460,9 +460,6 @@ def view(query, use_currency=None):
     if data["ticks"] == []:
         raise RuntimeError("No data found for your query. Wrong range?")
 
-    # import json
-    # print json.dumps(data['meta'], indent=True)
-
     warnings = []
     if data["meta"]["time_begin"] - time_begin > 3600 * 24:
         warnings.append(

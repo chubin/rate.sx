@@ -99,7 +99,7 @@ def from_secs(secs):
 
     result = ""
     for name, size in sorted(INTERVAL_LENGTH.items(), key=lambda x: -x[1]):
-        number_of_subintervals = secs / size
+        number_of_subintervals = secs // size
         secs = secs % size
         if number_of_subintervals:
             result += f"{number_of_subintervals}{name}"
