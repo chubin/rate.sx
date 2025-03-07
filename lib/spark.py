@@ -3,9 +3,10 @@
 from __future__ import print_function
 import math
 from termcolor import colored
+from typing import List
 
 
-def my_ceil(v):
+def my_ceil(v: float) -> int:
     if v < 0:
         if math.ceil(v) != v:
             v -= 1
@@ -13,7 +14,7 @@ def my_ceil(v):
     return int(result)
 
 
-def to_bar(x):
+def to_bar(x: int) -> str:
     bars = "_▁▂▃▅▇"
     clr = "green"
     if x < 0:
@@ -22,7 +23,7 @@ def to_bar(x):
     return colored(bars[x % len(bars)], clr)
 
 
-def spark_numbers(vals):
+def spark_numbers(vals: List[float]) -> List[int]:
     deltas = [y - x for (x, y) in zip(vals[:-1], vals[1:])]
     max_delta = max(abs(x) for x in deltas)
 
@@ -34,7 +35,7 @@ def spark_numbers(vals):
     return mapped_deltas
 
 
-def spark(vals):
+def spark(vals: List[float]) -> str:
     mapped_deltas = spark_numbers(vals)
     bars = [to_bar(x) for x in mapped_deltas]
 

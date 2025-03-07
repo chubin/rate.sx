@@ -7,6 +7,7 @@ import sys
 import os
 import datetime
 from pymongo import MongoClient, ASCENDING
+from typing import Dict, List, Optional, Union
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
 sys.path.append(f"{MYDIR}/lib/")
@@ -26,7 +27,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
     MongDB client
     """
 
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Union[int, str]]]=None) -> None:
 
         self.client = MongoClient()
 
@@ -49,7 +50,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
         self._currency_factor_cache = {}
         self._spark_price_currency_ticks = []
 
-    def currency_factor(self, timestamp=None, currency=None):
+    def currency_factor(self, timestamp: Optional[Union[int, float]]=None, currency: None=None) -> int:
         """
         Factor that is used to convert value in <self.currency> in USD
         for specified <timestamp>
@@ -101,7 +102,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
 
         return 1 / price_symbol
 
-    def load_spark(self, symbol, timestamp):
+    def load_spark(self, symbol: str, timestamp: float) -> List[float]:
         """
         Generate spakrline for the <code> coin or for marktcap
         """
@@ -151,7 +152,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
 
         return price_ticks
 
-    def mng_load_marketcap_global_data(self, timestamp=None):
+    def mng_load_marketcap_global_data(self, timestamp: None=None) -> Dict[str, Union[int, float]]:
         """
         Load marketcap data from MongoDB
         """
@@ -184,7 +185,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
 
         return answer
 
-    def mng_load_coins_data(self, timestamp=None):
+    def mng_load_coins_data(self, timestamp: None=None) -> List[Dict[str, Union[str, float, List[float]]]]:
         """
         Load coins data from MongoDB
         """
@@ -276,7 +277,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
 
         return data
 
-    def load_from_mongo(self):
+    def load_from_mongo(self) -> Dict[str, Union[List[Dict[str, Union[str, float, List[float]]]], Dict[str, Union[int, float]], str]]:
         """
         load all data from mongodb
         """

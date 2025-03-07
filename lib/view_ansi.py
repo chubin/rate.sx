@@ -12,6 +12,7 @@ from terminaltables import WindowsTable
 #  GithubFlavoredMarkdownTable, SingleTable, DoubleTable, PorcelainTable
 from colorama import Fore, Style
 from termcolor import colored
+from typing import Dict, List, Tuple, Union
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
 sys.path.append(f"{MYDIR}/lib/")
@@ -42,7 +43,7 @@ HEADER = HEADER.replace("X", "\033[33m").replace("Y", "\033[32m")
 #
 
 
-def human_format(num):
+def human_format(num: float) -> str:
     """
     Convert <num> into human form (round it and add a suffix)
     """
@@ -54,7 +55,7 @@ def human_format(num):
     return f"{num:.3f}{['', 'K', 'M', 'B', 'T', 'Q'][magnitude]}"
 
 
-def _colorize_entries(entries):
+def _colorize_entries(entries: List[Dict[str, Union[str, float, List[float]]]]) -> List[List[str]]:
     """
     Colorize table <entries>
     """
@@ -84,7 +85,7 @@ def _colorize_entries(entries):
     return data
 
 
-def _colorize_frame(s_frame):
+def _colorize_frame(s_frame: str) -> str:
     """
     Colorize frame in string s_frame
     """
@@ -121,8 +122,8 @@ def _colorize_frame(s_frame):
 
 
 def print_table(
-    currency, data, directions, marktcap_spark, config
-):  # pylint: disable=too-many-locals
+    currency: str, data: Dict[str, Union[List[Dict[str, Union[str, float, List[float]]]], Dict[str, Union[int, float]], str]], directions: Tuple[int, int, int], marktcap_spark: str, config: Dict[str, Union[int, str]]
+) -> str:  # pylint: disable=too-many-locals
     """
     Generate main table. Use specified <currency> as the main unit.
     """
