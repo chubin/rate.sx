@@ -14,3 +14,4 @@ termcolor
 PyYAML
 dateparser
 pylint
+black
