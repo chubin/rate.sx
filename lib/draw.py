@@ -308,6 +308,12 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
                 self.palette = "spectrum-reversed"
                 self.reverse = None
                 self.sleep = None
+                self.sort_by_column = None
+
+        diagram.PALETTE['spectrum-reversed'] = {
+            0x010: diagram.PALETTE['spectrum'][0x010][::-1],
+            0x100: diagram.PALETTE['spectrum'][0x100][::-1],
+        }
 
         data = self.data
 
