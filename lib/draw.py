@@ -52,7 +52,10 @@ import sys
 import datetime
 import os
 import re
-import StringIO
+try:
+    import StringIO
+except ImportError:
+    from io import StringIO
 import diagram
 from colorama import Fore, Back, Style
 
@@ -297,7 +300,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         data = self.data
 
         istream = [str(x) for x in data['ticks']]
-        ostream = StringIO.StringIO()
+        ostream = StringIO() # StringIO.StringIO()
         size = diagram.Point((self.width, self.height))
         option = Option()
         engine = diagram.AxisGraph(size, option)
