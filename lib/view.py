@@ -1,14 +1,6 @@
 from mng import MongoReader
 from view_ansi import print_table
 
-import sys
-
-try:
-    reload(sys)
-    sys.setdefaultencoding("utf-8")
-except NameError:
-    pass  # Python 3 already defaults to utf-8
-
 
 def show(config):
     "main function"
