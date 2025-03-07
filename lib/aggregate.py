@@ -147,6 +147,10 @@ def aggregate_coin(coin, time_start, interval):
     time_end = time_start + interval
     entries = list(_get_entries(coin, time_start, time_end))
 
+    if not entries:
+        _log("no entries for interval: %s %s %s" % (coin, time_start, time_end))
+        return
+
     keys = [
         "rank",
         "price_usd",
@@ -208,6 +212,10 @@ def aggregate_currencies(_, time_start, interval):
 
     time_end = time_start + interval
     entries = MONGO_READER.get_raw_data(None, time_start, time_end, collection_name='currencies')
+
+    if not entries:
+        _log("no entries for interval: %s %s" % (time_start, time_end))
+        return
 
     result = {
         'timestamp': entries[0].get('timestamp'),
@@ -508,11 +516,11 @@ def aggregate_new_entries(coin):
         inserted_entries = 0
         timestamp = last_aggregated_timestamp
         while timestamp <= last_timestamp:
-            try:
-                entry = aggregation_function(coin, timestamp, interval_size)
-            except Exception as e_msg:
-                _log_error("ERROR: coin: %s: %s: %s" % (coin, time.strftime("%Y-%m-%d %H:%M", time.gmtime(timestamp)), e_msg))
-                entry = None
+            #try:
+            entry = aggregation_function(coin, timestamp, interval_size)
+            # except Exception as e_msg:
+            #     _log_error("ERROR: coin: %s: %s: %s" % (coin, time.strftime("%Y-%m-%d %H:%M", time.gmtime(timestamp)), e_msg))
+            #     entry = None
 
             #import json
             #print json.dumps(entry)
@@ -611,10 +619,10 @@ def main():
     coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
 
     for coin in coins_to_aggregate:
-        try:
+        #try:
             aggregate_new_entries(coin)
-        except IndexError as e_msg:
-            _log_error("ERROR: coin: %s: %s" % (coin, e_msg))
+        # except IndexError as e_msg:
+        #     _log_error("ERROR: coin: %s: %s" % (coin, e_msg))
 
 if __name__ == '__main__':
     main()
