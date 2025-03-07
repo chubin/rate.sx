@@ -53,7 +53,7 @@ def get_internal(topic):
     return ""
 
 def get_digest(data):
-    return hashlib.sha1(json.dumps(data, sort_keys=True)).hexdigest()
+    return hashlib.sha1(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
  
 def get_cmd_output(hostname, topic, request_options):
 
@@ -61,7 +61,7 @@ def get_cmd_output(hostname, topic, request_options):
 
     cache_file = '%s/cache/%s' % (MYDIR, digest)
     if os.path.exists(cache_file):
-        return open(cache_file).read().decode('utf-8')
+        return open(cache_file).read()
     #elif hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
     #    return open(cache_file).read().decode('utf-8')
     else:
@@ -111,7 +111,7 @@ def get_cmd_output(hostname, topic, request_options):
     open(cache_file, 'w').write(answer)
     #p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     #answer = p.communicate()[0]
-    return answer.decode('utf-8')
+    return answer
 
 def rewrite_aliases(word):
     if word == ':bash.completion':

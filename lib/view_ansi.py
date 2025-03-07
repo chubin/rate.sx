@@ -1,5 +1,3 @@
-# vim: encoding=utf-8
-
 """
 visualization of data for ANSI terminal
 """
@@ -88,25 +86,23 @@ def _colorize_frame(s_frame):
 
     output = []
     for line in s_frame.splitlines():
-        line = line.decode('utf-8')\
+        line = line\
                 .replace(u'lqqqq', Style.DIM + u'lqqqq')\
                 .replace(u'tqqqq', Style.DIM + u'tqqqq')\
                 .replace(u'mqqqq', Style.DIM + u'mqqqq')\
                 .replace(u'x', Style.DIM + u'x' + Style.RESET_ALL)\
                 .replace(u'qqqqk', u'qqqqk' + Style.RESET_ALL)\
                 .replace(u'qqqqu', u'qqqqu' + Style.RESET_ALL)\
-                .replace(u'qqqqj', u'qqqqj' + Style.RESET_ALL)\
-                .encode('utf-8')
+                .replace(u'qqqqj', u'qqqqj' + Style.RESET_ALL)
 
-        line = line.decode('utf-8')\
+        line = line\
                 .replace(u'┌────', Style.DIM + u'┌────')\
                 .replace(u'├────', Style.DIM + u'├────')\
                 .replace(u'└────', Style.DIM + u'└────')\
                 .replace(u'│', Style.DIM + u'│' + Style.RESET_ALL)\
                 .replace(u'────┐', u'────┐' + Style.RESET_ALL)\
                 .replace(u'────┤', u'────┤' + Style.RESET_ALL)\
-                .replace(u'────┘', u'────┘' + Style.RESET_ALL)\
-                .encode('utf-8')
+                .replace(u'────┘', u'────┘' + Style.RESET_ALL)
 
         output.append(line)
     return "\n".join(output)

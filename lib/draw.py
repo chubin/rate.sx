@@ -183,7 +183,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         if not isinstance(value, str):
             value = _format_value(value)
         if self.currency_symbol:
-            return '%s%s' % (self.currency_symbol.decode('utf8'), value)
+            return '%s%s' % (self.currency_symbol, value)
         return '%s %s' % (value, self.currency)
 
     def _show_change_percentage(self):
@@ -310,7 +310,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         lines = [high_line] + ostream.getvalue().splitlines() + [low_line]
 
         output = ""
-        output += "\n".join([u"  │ %s" % x.decode('utf-8') for x in lines])
+        output += "\n".join([u"  │ %s" % x for x in lines])
         output += u"\n  └" + u"─" * 80
 
         return output

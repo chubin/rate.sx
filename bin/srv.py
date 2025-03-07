@@ -70,7 +70,7 @@ def send_malformed():
 def log_query(ip, hostname, topic, user_agent):
     log_entry = "%s %s %s %s %s" % (datetime.datetime.now(), ip, hostname, topic, user_agent)
     with open(FILE_QUERIES_LOG, 'a') as my_file:
-        my_file.write(log_entry.encode('utf-8')+"\n")
+        my_file.write(log_entry + "\n")
 
 @app.route("/", methods=['GET'])
 @app.route("/<path:topic>", methods=["GET"])
