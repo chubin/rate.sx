@@ -1032,6 +1032,8 @@ COINS_NAMES = (
 
     ("MATIC",   "Polygon"),
     ("ALGO",    "Algorand"),
+
+    ("XNO",     "Nano"),
 )
     # ("BTG", "Bitgem"),
 
