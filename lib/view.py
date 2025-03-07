@@ -57,3 +57,10 @@ def show(config):
         output = "ERROR: %s" % e
 
     return output
+
+
+def main():
+    print(show({}))
+
+if __name__ == "__main__":
+    main()
