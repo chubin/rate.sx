@@ -75,7 +75,7 @@ def _colorize_entries(entries):
         price = colored(to_precision(price, 6), 'cyan')
         cap = human_format(cap)
 
-        data.append([rank+1, code, price, change_24h, change_1h, cap, s_spark])
+        data.append([str(rank+1), code, price, change_24h, change_1h, cap, s_spark])
 
     return data
 
