@@ -148,7 +148,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         time_end = self.data['meta']['time_end']
 
         number_of_spaces = int(1.0*self.width*(timestamp - time_begin)/(time_end - time_begin))
-        number_of_spaces -= len(label)/2
+        number_of_spaces -= len(label)//2
         return " "*number_of_spaces + label
 
     def _format_time(self, timestamp, use_format=None, show_date=None, show_time=None):
@@ -425,6 +425,9 @@ def view(query, use_currency=None):
     except SyntaxError as e_msg:
         raise RuntimeError("%s" % e_msg)
 
+    if not coin2 and use_currency:
+        coin2 = use_currency
+
     data = get_data(query, use_currency=use_currency)
 
     if data['ticks'] == []:
@@ -442,7 +445,7 @@ def view(query, use_currency=None):
         width=80,
         height=25,
         msg_interval='@' not in query,
-        currency=coin2 or 'USD',
+        currency=coin2 or "USD",
         warnings=warnings,
     )
     dia = Diagram(data, (time_begin, time_end), options=options)
@@ -458,8 +461,8 @@ def main():
 
     try:
         import json
-        sys.stdout.write(json.dumps(get_data(query)))
-        # sys.stdout.write(view(query))
+        # sys.stdout.write(json.dumps(get_data(query)))
+        sys.stdout.write(view(query))
     except RuntimeError as e_msg:
         print("ERROR: %s" % e_msg)
         sys.exit(1)

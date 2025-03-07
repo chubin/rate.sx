@@ -87,7 +87,7 @@ def get_cmd_output(hostname, topic, request_options):
 
             if answer is None:
                 try:
-                    answer = draw.view(topic, use_currency=use_currency)
+                    answer = draw.view(topic, use_currency=currency)
                 except RuntimeError as e:
                     return "ERROR: %s\n" % e
 
