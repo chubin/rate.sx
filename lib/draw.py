@@ -51,11 +51,8 @@ import sys
 import datetime
 import os
 import re
+from io import BytesIO
 
-try:
-    import StringIO
-except ImportError:
-    from io import StringIO
 import diagram
 from colorama import Fore, Back, Style
 
@@ -315,7 +312,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         data = self.data
 
         istream = [str(x) for x in data["ticks"]]
-        ostream = StringIO()  # StringIO.StringIO()
+        ostream = BytesIO()
         size = diagram.Point((self.width, self.height))
         option = Option()
         engine = diagram.AxisGraph(size, option)
@@ -325,7 +322,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
         high_line = self._align_label(meta["time_max"], _format_value(meta["max"]))
         low_line = self._align_label(meta["time_min"], _format_value(meta["min"]))
-        lines = [high_line] + ostream.getvalue().splitlines() + [low_line]
+        lines = [high_line] + ostream.getvalue().decode("utf-8").splitlines() + [low_line]
 
         output = ""
         output += "\n".join([f"  │ {x}" for x in lines])
