@@ -310,9 +310,9 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
                 self.sleep = None
                 self.sort_by_column = None
 
-        diagram.PALETTE['spectrum-reversed'] = {
-            0x010: diagram.PALETTE['spectrum'][0x010][::-1],
-            0x100: diagram.PALETTE['spectrum'][0x100][::-1],
+        diagram.PALETTE["spectrum-reversed"] = {
+            0x010: diagram.PALETTE["spectrum"][0x010][::-1],
+            0x100: diagram.PALETTE["spectrum"][0x100][::-1],
         }
 
         data = self.data
@@ -328,7 +328,9 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
         high_line = self._align_label(meta["time_max"], _format_value(meta["max"]))
         low_line = self._align_label(meta["time_min"], _format_value(meta["min"]))
-        lines = [high_line] + ostream.getvalue().decode("utf-8").splitlines() + [low_line]
+        lines = (
+            [high_line] + ostream.getvalue().decode("utf-8").splitlines() + [low_line]
+        )
 
         output = ""
         output += "\n".join([f"  │ {x}" for x in lines])

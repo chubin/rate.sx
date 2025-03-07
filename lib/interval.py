@@ -70,7 +70,7 @@ def _parse_datetime(date_time: str) -> datetime.datetime:
     return dateparser.parse(date_time)
 
 
-def parse_datetime(date_time: str, now: None=None) -> int:
+def parse_datetime(date_time: str, now: None = None) -> int:
     """
     Parse ``date_time``, return time in seconds since EPOCH.
     """
@@ -144,7 +144,7 @@ def parse_length(length: str) -> int:
 
 
 def parse_interval(
-    interval_string: str, now: None=None
+    interval_string: str, now: None = None
 ) -> Tuple[int, int]:  # pylint: disable=too-many-branches,too-many-return-statements
     """
     Parse ``interval_string`` and return a pair of timestamps
