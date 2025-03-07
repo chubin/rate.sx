@@ -1,4 +1,3 @@
-
 # encoding: utf-8
 
 """
@@ -52,6 +51,7 @@ import sys
 import datetime
 import os
 import re
+
 try:
     import StringIO
 except ImportError:
@@ -59,7 +59,7 @@ except ImportError:
 import diagram
 from colorama import Fore, Back, Style
 
-MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
 sys.path.append("%s/lib/" % MYDIR)
 
 # pylint: disable=wrong-import-position
@@ -70,6 +70,7 @@ import interval
 from ansi_utils import colorize_number
 from to_precision import to_precision
 from globals import MSG_SEE_HELP, MSG_INTERVAL
+
 # pylint: enable=wrong-import-position
 
 PALETTES = {
@@ -102,26 +103,27 @@ PALETTES_REVERSE = {
     },
 }
 
+
 def _format_value(value, precision=3, show_plus=False):
     value = str(to_precision(value, precision))
 
-    plus = ''
-    if show_plus and not value.startswith('-'):
-        plus = '+'
+    plus = ""
+    if show_plus and not value.startswith("-"):
+        plus = "+"
 
-    if 'e' in value:
-        return plus + str(float(value)).lstrip('+')
-    return plus + value.lstrip('+')
+    if "e" in value:
+        return plus + str(float(value)).lstrip("+")
+    return plus + value.lstrip("+")
+
 
 def _format_percentage(value):
     res = "%.2f%%" % value
     if value > 0:
-        res = "+"+res
+        res = "+" + res
     return res
 
 
 class Diagram(object):  # pylint: disable=too-many-instance-attributes
-
     """
     Diagram drawer. Uses ``data`` (with ``meta`` and ``ticks``) as its input,
     returns formated diagram as a string (generate_diagram()) or
@@ -131,25 +133,27 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, data, interval_pair, options=None):
         self.data = data
         self.options = options if options is not None else {}
-        self.width = self.options.get('width', 80)
-        self.height = self.options.get('height', 25)
+        self.width = self.options.get("width", 80)
+        self.height = self.options.get("height", 25)
         self.palette = 0
-        self.warnings = self.options.get('warnings', [])
+        self.warnings = self.options.get("warnings", [])
 
         self.interval = interval_pair[1] - interval_pair[0]
-        self.currency = self.options.get('currency' or 'USD')
+        self.currency = self.options.get("currency" or "USD")
         self.currency_symbol = currencies_names.SYMBOL.get(self.currency)
 
     def _align_label(self, timestamp, label):
         """
         Align ``label`` according to its ``timestamp``
         """
-        time_begin = self.data['meta']['time_begin']
-        time_end = self.data['meta']['time_end']
+        time_begin = self.data["meta"]["time_begin"]
+        time_end = self.data["meta"]["time_end"]
 
-        number_of_spaces = int(1.0*self.width*(timestamp - time_begin)/(time_end - time_begin))
-        number_of_spaces -= len(label)//2
-        return " "*number_of_spaces + label
+        number_of_spaces = int(
+            1.0 * self.width * (timestamp - time_begin) / (time_end - time_begin)
+        )
+        number_of_spaces -= len(label) // 2
+        return " " * number_of_spaces + label
 
     def _format_time(self, timestamp, use_format=None, show_date=None, show_time=None):
         """
@@ -160,20 +164,20 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         """
 
         if use_format is None:
-            time_fmt = '%H:%M'
+            time_fmt = "%H:%M"
 
-            if self.interval < 7*24*3600:
-                date_fmt = '%a %d'
+            if self.interval < 7 * 24 * 3600:
+                date_fmt = "%a %d"
             else:
-                date_fmt = '%d %b'
+                date_fmt = "%d %b"
 
-            fmt = ''
-            if self.interval >= 24*3600 or show_date:
+            fmt = ""
+            if self.interval >= 24 * 3600 or show_date:
                 fmt = date_fmt
 
-            if self.interval < 24*3600 or show_time:
+            if self.interval < 24 * 3600 or show_time:
                 if fmt:
-                    fmt += ' '
+                    fmt += " "
                 fmt += time_fmt
 
         else:
@@ -186,40 +190,46 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         if not isinstance(value, str):
             value = _format_value(value)
         if self.currency_symbol:
-            return '%s%s' % (self.currency_symbol, value)
-        return '%s %s' % (value, self.currency)
+            return "%s%s" % (self.currency_symbol, value)
+        return "%s %s" % (value, self.currency)
 
     def _show_change_percentage(self):
         f_p = _format_percentage
-        meta = self.data['meta']
-        change = meta['end'] - meta['begin']
-        change_percentage = 100.0*change/meta['begin']
-        return colorize_number(_format_value(change, precision=5, show_plus=True)), \
-               colorize_number(f_p(change_percentage))
+        meta = self.data["meta"]
+        change = meta["end"] - meta["begin"]
+        change_percentage = 100.0 * change / meta["begin"]
+        return colorize_number(
+            _format_value(change, precision=5, show_plus=True)
+        ), colorize_number(f_p(change_percentage))
 
     def _make_header(self):
-        coin_symbol = self.data['meta']['symbol']
+        coin_symbol = self.data["meta"]["symbol"]
         coin_name = coins_names.coin_name(coin_symbol)
 
-        meta = self.data['meta']
+        meta = self.data["meta"]
         interval_name = interval.from_secs(self.interval)
         time_interval = "%s +%s" % (
-            self._format_time(meta['time_begin']),
-            interval_name)
-            #self._format_time(meta['time_end'], show_date=True, show_time=True),
+            self._format_time(meta["time_begin"]),
+            interval_name,
+        )
+        # self._format_time(meta['time_end'], show_date=True, show_time=True),
 
         output = "\n"
-        if self.currency == 'USD':
-            output += u"{-1▶ %s (%s) }{1▶}" % (coin_name, coin_symbol)
+        if self.currency == "USD":
+            output += "{-1▶ %s (%s) }{1▶}" % (coin_name, coin_symbol)
         else:
             currency_symbol = self.currency
             currency_name = currencies_names.currency_name(self.currency)
             if not currency_name:
                 currency_name = coins_names.coin_name(self.currency)
 
-            output += u"{-1▶ %s (%s) to %s (%s) }{1▶}" % \
-                      (coin_name, coin_symbol, currency_name, currency_symbol)
-        #output += u"{1%s (%s)}," % (coin_name, coin_symbol)
+            output += "{-1▶ %s (%s) to %s (%s) }{1▶}" % (
+                coin_name,
+                coin_symbol,
+                currency_name,
+                currency_symbol,
+            )
+        # output += u"{1%s (%s)}," % (coin_name, coin_symbol)
         output += " %s" % (time_interval)
         output += " %s\n" % self._show_change_percentage()[1]
         output += "\n\n"
@@ -231,26 +241,32 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         f_f = lambda x: self._format_currency(_format_value(x, precision=5))
         f_t = lambda t: self._format_time(t, show_date=True, show_time=True)
 
-        meta = self.data['meta']
+        meta = self.data["meta"]
 
         output = "\n\n"
-        output += "" + \
-                  "{2begin:} %s (%s)" % (f_f(meta['begin']), f_t(meta['time_begin'])) + \
-                  "{2 // }" + \
-                  "{2end:} %s (%s)" % (f_f(meta['end']), f_t(meta['time_end'])) + \
-                  "\n"
-        output += "" + \
-                  "{2high:} %s (%s)" % (f_f(meta['max']), f_t(meta['time_max'])) + \
-                  "{2 // }" + \
-                  "{2low:} %s (%s)" % (f_f(meta['min']), f_t(meta['time_min'])) + \
-                  "\n"
-        output += "" + \
-                  "{2avg:} %s" % f_f(meta['avg']) + \
-                  "{2 // }" + \
-                  "{2median:} %s" % f_f((meta['max'] + meta['min'])/2) + \
-                  "{2 // }" + \
-                  "{2change:} %s (%s)" % self._show_change_percentage() + \
-                  "\n"
+        output += (
+            ""
+            + "{2begin:} %s (%s)" % (f_f(meta["begin"]), f_t(meta["time_begin"]))
+            + "{2 // }"
+            + "{2end:} %s (%s)" % (f_f(meta["end"]), f_t(meta["time_end"]))
+            + "\n"
+        )
+        output += (
+            ""
+            + "{2high:} %s (%s)" % (f_f(meta["max"]), f_t(meta["time_max"]))
+            + "{2 // }"
+            + "{2low:} %s (%s)" % (f_f(meta["min"]), f_t(meta["time_min"]))
+            + "\n"
+        )
+        output += (
+            ""
+            + "{2avg:} %s" % f_f(meta["avg"])
+            + "{2 // }"
+            + "{2median:} %s" % f_f((meta["max"] + meta["min"]) / 2)
+            + "{2 // }"
+            + "{2change:} %s (%s)" % self._show_change_percentage()
+            + "\n"
+        )
 
         return output
 
@@ -262,8 +278,8 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         def _colorize_curlies_block(text):
 
             text = text.group()[1:-1]
-            stripped = text.lstrip('0123456789-')
-            color_number = int(text[:len(text)-len(stripped)])
+            stripped = text.lstrip("0123456789-")
+            color_number = int(text[: len(text) - len(stripped)])
 
             reverse = False
             if color_number < 0:
@@ -281,7 +297,9 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
 
     def _make_diagram(self):
 
-        class Option(object): #pylint: disable=too-many-instance-attributes,too-few-public-methods
+        class Option(
+            object
+        ):  # pylint: disable=too-many-instance-attributes,too-few-public-methods
             """Diagram configuration."""
 
             def __init__(self):
@@ -293,28 +311,28 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
                 self.height = None
                 self.keys = None
                 self.legend = None
-                self.palette = 'spectrum-reversed'
+                self.palette = "spectrum-reversed"
                 self.reverse = None
                 self.sleep = None
 
         data = self.data
 
-        istream = [str(x) for x in data['ticks']]
-        ostream = StringIO() # StringIO.StringIO()
+        istream = [str(x) for x in data["ticks"]]
+        ostream = StringIO()  # StringIO.StringIO()
         size = diagram.Point((self.width, self.height))
         option = Option()
         engine = diagram.AxisGraph(size, option)
         engine.consume(istream, ostream)
 
-        meta = data['meta']
+        meta = data["meta"]
 
-        high_line = self._align_label(meta['time_max'], _format_value(meta['max']))
-        low_line = self._align_label(meta['time_min'], _format_value(meta['min']))
+        high_line = self._align_label(meta["time_max"], _format_value(meta["max"]))
+        low_line = self._align_label(meta["time_min"], _format_value(meta["min"]))
         lines = [high_line] + ostream.getvalue().splitlines() + [low_line]
 
         output = ""
-        output += "\n".join([u"  │ %s" % x for x in lines])
-        output += u"\n  └" + u"─" * 80
+        output += "\n".join(["  │ %s" % x for x in lines])
+        output += "\n  └" + "─" * 80
 
         return output
 
@@ -324,7 +342,7 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         for line in self.warnings:
             output += Fore.YELLOW + "WARNING: %s\n" % line + Style.RESET_ALL
 
-        if self.options.get('msg_interval'):
+        if self.options.get("msg_interval"):
             output += MSG_INTERVAL
         else:
             output += MSG_SEE_HELP
@@ -351,17 +369,19 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
         """
         print(self.make_view())
 
+
 def _split_query(query):
 
-    at_index = query.find('@')
-    if '@' in query:
+    at_index = query.find("@")
+    if "@" in query:
         coin = query[:at_index]
-        interval_string = query[at_index+1:]
+        interval_string = query[at_index + 1 :]
     else:
         coin = query
-        interval_string = '24h'
+        interval_string = "24h"
 
     return coin, interval_string
+
 
 def _parse_query(query):
 
@@ -369,13 +389,17 @@ def _parse_query(query):
 
     coin = coin.upper()
     coin2 = None
-    if '/' in coin:
-        coin, coin2 = coin.split('/', 1)
+    if "/" in coin:
+        coin, coin2 = coin.split("/", 1)
 
-    if coins_names.coin_name(coin) == '' and currencies_names.currency_name(coin) == '':
+    if coins_names.coin_name(coin) == "" and currencies_names.currency_name(coin) == "":
         raise SyntaxError("Invalid coin/currency name: %s" % coin)
 
-    if coin2 and coins_names.coin_name(coin2) == '' and currencies_names.currency_name(coin2) == '':
+    if (
+        coin2
+        and coins_names.coin_name(coin2) == ""
+        and currencies_names.currency_name(coin2) == ""
+    ):
         raise SyntaxError("Invalid coin/currency name: %s" % coin2)
 
     try:
@@ -389,6 +413,7 @@ def _parse_query(query):
 
     return coin, coin2, time_begin, time_end
 
+
 def get_data(query, use_currency=None):
 
     try:
@@ -398,10 +423,14 @@ def get_data(query, use_currency=None):
 
     # if currency is specified in the domain name (use_currency)
     # but not in the query, then we use it as the output currency
-    if use_currency \
-        and not coin2 \
-        and (coins_names.coin_name(use_currency) != '' \
-            or currencies_names.currency_name(use_currency) != ''):
+    if (
+        use_currency
+        and not coin2
+        and (
+            coins_names.coin_name(use_currency) != ""
+            or currencies_names.currency_name(use_currency) != ""
+        )
+    ):
         coin2 = use_currency
 
     ticks = 80
@@ -411,6 +440,7 @@ def get_data(query, use_currency=None):
         data = aggregate.get_aggregated_coin(coin, time_begin, time_end, ticks)
 
     return data
+
 
 def view(query, use_currency=None):
     """
@@ -430,37 +460,40 @@ def view(query, use_currency=None):
 
     data = get_data(query, use_currency=use_currency)
 
-    if data['ticks'] == []:
+    if data["ticks"] == []:
         raise RuntimeError("No data found for your query. Wrong range?")
 
-    #import json
-    #print json.dumps(data['meta'], indent=True)
+    # import json
+    # print json.dumps(data['meta'], indent=True)
 
     warnings = []
-    if data['meta']['time_begin'] - time_begin > 3600*24:
+    if data["meta"]["time_begin"] - time_begin > 3600 * 24:
         warnings.append(
-            "for the moment, rate.sx has historical data only starting from 2018-Jan-07")
+            "for the moment, rate.sx has historical data only starting from 2018-Jan-07"
+        )
 
     options = dict(
         width=80,
         height=25,
-        msg_interval='@' not in query,
+        msg_interval="@" not in query,
         currency=coin2 or "USD",
         warnings=warnings,
     )
     dia = Diagram(data, (time_begin, time_end), options=options)
     return dia.make_view()
 
+
 def main():
     "experimenting with get_aggregated_coin()"
 
     if sys.argv == []:
-        query = 'ETH@4d'
+        query = "ETH@4d"
     else:
         query = sys.argv[1]
 
     try:
         import json
+
         # sys.stdout.write(json.dumps(get_data(query)))
         sys.stdout.write(view(query))
     except RuntimeError as e_msg:
@@ -468,5 +501,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

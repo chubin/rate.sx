@@ -21,18 +21,21 @@ Exported functions:
 
 """
 
-MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
 sys.path.append("%s/lib/" % MYDIR)
 
 from mng import MongoReader
+
 mongo_reader = MongoReader()
 
+
 def get_rate_to_usd(currency, timestamp=None):
-    return 1/mongo_reader.currency_factor(timestamp=timestamp, currency=currency)
+    return 1 / mongo_reader.currency_factor(timestamp=timestamp, currency=currency)
+
 
 def _main():
     pass
 
+
 if __name__ == "__main__":
     _main()
-

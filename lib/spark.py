@@ -1,8 +1,9 @@
-#vim:encoding=utf-8
+# vim:encoding=utf-8
 
 from __future__ import print_function
 import math
 from termcolor import colored
+
 
 def my_ceil(v):
     if v < 0:
@@ -11,24 +12,27 @@ def my_ceil(v):
     result = math.ceil(v)
     return int(result)
 
+
 def to_bar(x):
-    bars = u'_▁▂▃▅▇'
-    clr = 'green'
+    bars = "_▁▂▃▅▇"
+    clr = "green"
     if x < 0:
-        clr = 'red'
+        clr = "red"
         x = -x
-    return colored(bars[x%len(bars)], clr)
+    return colored(bars[x % len(bars)], clr)
+
 
 def spark_numbers(vals):
-    deltas = [y-x for (x,y) in zip(vals[:-1], vals[1:])]
+    deltas = [y - x for (x, y) in zip(vals[:-1], vals[1:])]
     max_delta = max(abs(x) for x in deltas)
 
     if max_delta == 0:
-        mapped_deltas = [ 0 for x in deltas ]
+        mapped_deltas = [0 for x in deltas]
     else:
-        mapped_deltas = [ my_ceil(x*5.0/max_delta) for x in deltas ]
+        mapped_deltas = [my_ceil(x * 5.0 / max_delta) for x in deltas]
 
     return mapped_deltas
+
 
 def spark(vals):
     mapped_deltas = spark_numbers(vals)
@@ -36,8 +40,8 @@ def spark(vals):
 
     return "".join(bars)
 
-if __name__ == '__main__':
-    data = [1,-1,2,-2,3,-3,4,-4,5,-5]
+
+if __name__ == "__main__":
+    data = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5]
     print(spark_numbers(data))
     print(spark(data))
-
