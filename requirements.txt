@@ -17,3 +17,4 @@ pylint
 black
 flynt
 MonkeyType
+Babel

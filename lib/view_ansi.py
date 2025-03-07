@@ -4,7 +4,7 @@ visualization of data for ANSI terminal
 
 import sys
 import os
-import locale
+from typing import Dict, List, Tuple, Union
 
 from terminaltables import WindowsTable
 
@@ -12,7 +12,7 @@ from terminaltables import WindowsTable
 #  GithubFlavoredMarkdownTable, SingleTable, DoubleTable, PorcelainTable
 from colorama import Fore, Style
 from termcolor import colored
-from typing import Dict, List, Tuple, Union
+from babel.numbers import format_decimal
 
 MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
 sys.path.append(f"{MYDIR}/lib/")
@@ -23,11 +23,6 @@ import spark
 import currencies_names
 from ansi_utils import colorize_number, colorize_direction
 from globals import MSG_FOLLOW_ME, MSG_NEW_FEATURE, MSG_GITHUB_BUTTON
-
-# pylint: enable=wrong-import-position
-
-locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
-
 
 HEADER = r"""
                                                             X          _               Y
@@ -148,14 +143,21 @@ def print_table(
     if currency_symbol == "":
         currency_suffix = " " + currency
 
-    market_cap = locale.format(
-        "%d", int(data["marketcap_global_data"]["total_market_cap_usd"]), grouping=True
+    # Currently, always use the en_US for formatting the numbers. May be parametrized in future.
+    locale_to_use = "en_US"
+
+    market_cap = format_decimal(
+        int(data["marketcap_global_data"]["total_market_cap_usd"]),
+        group_separator=True,
+        locale=locale_to_use,
     )
     market_cap = currency_symbol + market_cap + currency_suffix
     market_cap += " " + colorize_direction(market_cap_direction)
 
-    vol_24h = locale.format(
-        "%d", int(data["marketcap_global_data"]["total_24h_volume_usd"]), grouping=True
+    vol_24h = format_decimal(
+        int(data["marketcap_global_data"]["total_24h_volume_usd"]),
+        group_separator=True,
+        locale=locale_to_use,
     )
     vol_24h = currency_symbol + vol_24h + currency_suffix
     vol_24h += " " + colorize_direction(vol_24h_direction)
