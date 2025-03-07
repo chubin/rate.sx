@@ -47,6 +47,7 @@ import datetime
 import re
 from dateutil.relativedelta import relativedelta
 import dateparser
+from typing import Tuple
 
 INTERVAL_LENGTH = {
     "s": 1,
@@ -59,17 +60,17 @@ INTERVAL_LENGTH = {
 }
 
 
-def _epoch(dt_tuple):
+def _epoch(dt_tuple: datetime.datetime) -> int:
     return calendar.timegm(dt_tuple.timetuple())
 
 
-def _parse_datetime(date_time):
+def _parse_datetime(date_time: str) -> datetime.datetime:
     if date_time == "":
         return datetime.datetime.now()
     return dateparser.parse(date_time)
 
 
-def parse_datetime(date_time, now=None):
+def parse_datetime(date_time: str, now: None=None) -> int:
     """
     Parse ``date_time``, return time in seconds since EPOCH.
     """
@@ -82,7 +83,7 @@ def parse_datetime(date_time, now=None):
     return None
 
 
-def from_secs(secs):
+def from_secs(secs: int) -> str:
     """
     Convert number of seconds ``secs`` into interval description.
 
@@ -106,7 +107,7 @@ def from_secs(secs):
     return result
 
 
-def parse_length(length):
+def parse_length(length: str) -> int:
     """
     Parse ``length``` and return parsed length interval (in seconds)
     or None if length can't be parsed.
@@ -143,8 +144,8 @@ def parse_length(length):
 
 
 def parse_interval(
-    interval_string, now=None
-):  # pylint: disable=too-many-branches,too-many-return-statements
+    interval_string: str, now: None=None
+) -> Tuple[int, int]:  # pylint: disable=too-many-branches,too-many-return-statements
     """
     Parse ``interval_string`` and return a pair of timestamps
     in seconds since EPOCH
