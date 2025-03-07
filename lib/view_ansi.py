@@ -1,21 +1,21 @@
-# vim: encoding=utf-8
-
 """
 visualization of data for ANSI terminal
 """
 
 import sys
 import os
-import locale
+from typing import Dict, List, Tuple, Union
 
 from terminaltables import WindowsTable
+
 # Other useful tables:
 #  GithubFlavoredMarkdownTable, SingleTable, DoubleTable, PorcelainTable
 from colorama import Fore, Style
 from termcolor import colored
+from babel.numbers import format_decimal
 
-MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
-sys.path.append("%s/lib/" % MYDIR)
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
+sys.path.append(f"{MYDIR}/lib/")
 
 # pylint: disable=wrong-import-position
 from to_precision import to_precision
@@ -23,10 +23,6 @@ import spark
 import currencies_names
 from ansi_utils import colorize_number, colorize_direction
 from globals import MSG_FOLLOW_ME, MSG_NEW_FEATURE, MSG_GITHUB_BUTTON
-# pylint: enable=wrong-import-position
-
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-
 
 HEADER = r"""
                                                             X          _               Y
@@ -35,13 +31,14 @@ HEADER = r"""
 __ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZX__________|_| \__,_|\__\___()__/_\_\_____Y
  '           '           '           '           '                                           """
 
-HEADER = HEADER.replace('X', '\033[33m').replace('Y', '\033[32m')
+HEADER = HEADER.replace("X", "\033[33m").replace("Y", "\033[32m")
 
 #
 # visualzation functions
 #
 
-def human_format(num):
+
+def human_format(num: float) -> str:
     """
     Convert <num> into human form (round it and add a suffix)
     """
@@ -50,9 +47,12 @@ def human_format(num):
         magnitude += 1
         num /= 1000.0
     # add more suffixes if you need them
-    return '%.3f%s' % (num, ['', 'K', 'M', 'B', 'T', 'Q'][magnitude])
+    return f"{num:.3f}{['', 'K', 'M', 'B', 'T', 'Q'][magnitude]}"
 
-def _colorize_entries(entries):
+
+def _colorize_entries(
+    entries: List[Dict[str, Union[str, float, List[float]]]],
+) -> List[List[str]]:
     """
     Colorize table <entries>
     """
@@ -60,116 +60,143 @@ def _colorize_entries(entries):
     data = []
 
     for rank, entry in enumerate(entries):
-        code = entry['code']
-        price = entry['price']
-        change_24h = entry['change_24h']
-        change_1h = entry['change_1h']
-        cap = entry['cap']
-        s_spark = spark.spark(entry['spark'])
+        code = entry["code"]
+        price = entry["price"]
+        change_24h = entry["change_24h"]
+        change_1h = entry["change_1h"]
+        cap = entry["cap"]
+        s_spark = spark.spark(entry["spark"])
 
-        if change_24h != '-':
-            change_24h = colorize_number("%.2f%%" % change_24h)
+        if change_24h != "-":
+            change_24h = colorize_number(f"{change_24h:.2f}%")
 
-        if change_1h != '-':
-            change_1h = colorize_number("%.2f%%" % change_1h)
+        if change_1h != "-":
+            change_1h = colorize_number(f"{change_1h:.2f}%")
 
-        code = colored(code, 'cyan')
-        price = colored(to_precision(price, 6), 'cyan')
+        code = colored(code, "cyan")
+        price = colored(to_precision(price, 6), "cyan")
         cap = human_format(cap)
 
-        data.append([rank+1, code, price, change_24h, change_1h, cap, s_spark])
+        data.append([str(rank + 1), code, price, change_24h, change_1h, cap, s_spark])
 
     return data
 
-def _colorize_frame(s_frame):
+
+def _colorize_frame(s_frame: str) -> str:
     """
     Colorize frame in string s_frame
     """
 
     output = []
     for line in s_frame.splitlines():
-        line = line.decode('utf-8')\
-                .replace(u'lqqqq', Style.DIM + u'lqqqq')\
-                .replace(u'tqqqq', Style.DIM + u'tqqqq')\
-                .replace(u'mqqqq', Style.DIM + u'mqqqq')\
-                .replace(u'x', Style.DIM + u'x' + Style.RESET_ALL)\
-                .replace(u'qqqqk', u'qqqqk' + Style.RESET_ALL)\
-                .replace(u'qqqqu', u'qqqqu' + Style.RESET_ALL)\
-                .replace(u'qqqqj', u'qqqqj' + Style.RESET_ALL)\
-                .encode('utf-8')
+        line = (
+            line.replace("lqqqq", Style.DIM + "lqqqq")
+            .replace("tqqqq", Style.DIM + "tqqqq")
+            .replace("mqqqq", Style.DIM + "mqqqq")
+            .replace("x", Style.DIM + "x" + Style.RESET_ALL)
+            .replace("qqqqk", "qqqqk" + Style.RESET_ALL)
+            .replace("qqqqu", "qqqqu" + Style.RESET_ALL)
+            .replace("qqqqj", "qqqqj" + Style.RESET_ALL)
+        )
 
-        line = line.decode('utf-8')\
-                .replace(u'┌────', Style.DIM + u'┌────')\
-                .replace(u'├────', Style.DIM + u'├────')\
-                .replace(u'└────', Style.DIM + u'└────')\
-                .replace(u'│', Style.DIM + u'│' + Style.RESET_ALL)\
-                .replace(u'────┐', u'────┐' + Style.RESET_ALL)\
-                .replace(u'────┤', u'────┤' + Style.RESET_ALL)\
-                .replace(u'────┘', u'────┘' + Style.RESET_ALL)\
-                .encode('utf-8')
+        line = (
+            line.replace("┌────", Style.DIM + "┌────")
+            .replace("├────", Style.DIM + "├────")
+            .replace("└────", Style.DIM + "└────")
+            .replace("│", Style.DIM + "│" + Style.RESET_ALL)
+            .replace("────┐", "────┐" + Style.RESET_ALL)
+            .replace("────┤", "────┤" + Style.RESET_ALL)
+            .replace("────┘", "────┘" + Style.RESET_ALL)
+        )
 
         output.append(line)
     return "\n".join(output)
+
 
 #
 # that's everything we need to save (and to load later)
 #
 
-def print_table(currency, data, directions, marktcap_spark, config): # pylint: disable=too-many-locals
+
+def print_table(
+    currency: str,
+    data: Dict[
+        str,
+        Union[
+            List[Dict[str, Union[str, float, List[float]]]],
+            Dict[str, Union[int, float]],
+            str,
+        ],
+    ],
+    directions: Tuple[int, int, int],
+    marktcap_spark: str,
+    config: Dict[str, Union[int, str]],
+) -> str:  # pylint: disable=too-many-locals
     """
     Generate main table. Use specified <currency> as the main unit.
     """
 
     market_cap_direction, vol_24h_direction, btc_dominance_direction = directions
 
-    currency_symbol = currencies_names.SYMBOL.get(currency, '')
-    currency_suffix = ''
-    if currency_symbol == '':
-        currency_suffix = ' ' + currency
+    currency_symbol = currencies_names.SYMBOL.get(currency, "")
+    currency_suffix = ""
+    if currency_symbol == "":
+        currency_suffix = " " + currency
 
-    market_cap = locale.format(
-        "%d",
-        int(data['marketcap_global_data']['total_market_cap_usd']),
-        grouping=True)
+    # Currently, always use the en_US for formatting the numbers. May be parametrized in future.
+    locale_to_use = "en_US"
+
+    market_cap = format_decimal(
+        int(data["marketcap_global_data"]["total_market_cap_usd"]),
+        group_separator=True,
+        locale=locale_to_use,
+    )
     market_cap = currency_symbol + market_cap + currency_suffix
-    market_cap += ' ' + colorize_direction(market_cap_direction)
+    market_cap += " " + colorize_direction(market_cap_direction)
 
-    vol_24h = locale.format(
-        "%d",
-        int(data['marketcap_global_data']['total_24h_volume_usd']),
-        grouping=True)
+    vol_24h = format_decimal(
+        int(data["marketcap_global_data"]["total_24h_volume_usd"]),
+        group_separator=True,
+        locale=locale_to_use,
+    )
     vol_24h = currency_symbol + vol_24h + currency_suffix
-    vol_24h += ' ' + colorize_direction(vol_24h_direction)
+    vol_24h += " " + colorize_direction(vol_24h_direction)
 
-    btc_dominance = '%2.1f%%' % data['marketcap_global_data']['bitcoin_percentage_of_market_cap']
-    btc_dominance += ' ' + colorize_direction(btc_dominance_direction)
+    btc_dominance = (
+        f"{data['marketcap_global_data']['bitcoin_percentage_of_market_cap']:2.1f}%"
+    )
+    btc_dominance += " " + colorize_direction(btc_dominance_direction)
 
     header = [
-        'Rank',
-        'Coin',
-        'Price (%s)' % currency,
-        'Change (24H)',
-        'Change (1H)',
-        'Market Cap (%s)' % currency,
-        'Spark (1H)'
-        ]
+        "Rank",
+        "Coin",
+        f"Price ({currency})",
+        "Change (24H)",
+        "Change (1H)",
+        f"Market Cap ({currency})",
+        "Spark (1H)",
+    ]
+
+    table_data = [[colored(x, "yellow") for x in header]] + _colorize_entries(
+        data["data"]
+    )
     table_class = WindowsTable
-    table = table_class(
-        [[colored(x, 'yellow') for x in header]]
-        + _colorize_entries(data['data']))
+    table = table_class(table_data)
+
     table.inner_row_border = True
 
-    header = HEADER.replace('Z'*48, marktcap_spark)
+    header = HEADER.replace("Z" * 48, marktcap_spark)
 
     output = []
-    output += [colored("\n".join(header.splitlines()[1:]) + "\n", 'green')]
-    output += ["Market Cap: %s\n24h Vol: %s\nBTC Dominance: %s" \
-                % (market_cap, vol_24h, btc_dominance)]
+    output += [colored("\n".join(header.splitlines()[1:]) + "\n", "green")]
+    output += [
+        f"Market Cap: {market_cap}\n24h Vol: {vol_24h}\nBTC Dominance: {btc_dominance}"
+    ]
     output += [_colorize_frame(table.table)]
-    output += [Fore.WHITE + Style.DIM + "%s" % data['timestamp_now']  + Style.RESET_ALL]
+    output += [Fore.WHITE + Style.DIM + f"{data['timestamp_now']}" + Style.RESET_ALL]
     output += [""]
 
-    if not config.get('no-follow-line'):
+    if not config.get("no-follow-line"):
         output += [MSG_NEW_FEATURE]
         output += [MSG_FOLLOW_ME + MSG_GITHUB_BUTTON]
 

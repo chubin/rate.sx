@@ -10,7 +10,7 @@ Collections:
 
 <coins>:
 
-	{
+        {
         "symbol":           "BTC",
         "timestamp":        "1472761800"
         "rank":             "1",
@@ -55,32 +55,63 @@ import requests
 import time
 import calendar
 
-MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
 sys.path.append("%s/lib/" % MYDIR)
 
 from pymongo import MongoClient
+
 client = MongoClient()
 
-LOGFILE="%s/log/fetch.log" % MYDIR
+LOGFILE = "%s/log/fetch.log" % MYDIR
 logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
+    format="%(asctime)s %(levelname)-8s %(message)s",
     filename=LOGFILE,
-    level=logging.INFO)
+    level=logging.INFO,
+)
 
-CURRENCIES = [ 
-    "AUD", "BRL", "CAD", "CHF", "CLP", "CNY", "CZK", "DKK", "EUR", "GBP", 
-    "HKD", "HUF", "IDR", "ILS", "INR", "JPY", "KRW", "MXN", "MYR", "NOK",
-    "NZD", "PHP", "PKR", "PLN", "RUB", "SEK", "SGD", "THB", "TRY", "TWD",
-    "ZAR"
+CURRENCIES = [
+    "AUD",
+    "BRL",
+    "CAD",
+    "CHF",
+    "CLP",
+    "CNY",
+    "CZK",
+    "DKK",
+    "EUR",
+    "GBP",
+    "HKD",
+    "HUF",
+    "IDR",
+    "ILS",
+    "INR",
+    "JPY",
+    "KRW",
+    "MXN",
+    "MYR",
+    "NOK",
+    "NZD",
+    "PHP",
+    "PKR",
+    "PLN",
+    "RUB",
+    "SEK",
+    "SGD",
+    "THB",
+    "TRY",
+    "TWD",
+    "ZAR",
 ]
 
-TIMESTAMP = [calendar.timegm(time.gmtime())/300*300]
+TIMESTAMP = [calendar.timegm(time.gmtime()) / 300 * 300]
+
 
 def log(s):
     logging.error(s)
 
+
 def fetch_coins(start=0):
-    
+
     url = "https://api.coinmarketcap.com/v1/ticker/"
     if start != 0:
         url += "?start=%s" % start
@@ -120,10 +151,10 @@ def fetch_coins(start=0):
                 if TIMESTAMP[0]:
                     timestamp = TIMESTAMP[0]
                 else:
-                    timestamp = int(cmc_entry['last_updated'])/300*300
+                    timestamp = int(cmc_entry["last_updated"]) / 300 * 300
                     TIMESTAMP[0] = timestamp
 
-                cmc_entry['timestamp'] = timestamp
+                cmc_entry["timestamp"] = timestamp
                 for field in fields:
                     if field in int_fields:
                         entry[field] = int(cmc_entry[field])
@@ -142,6 +173,7 @@ def fetch_coins(start=0):
                 log("fetchng coins, %s: %s, %s" % (start, e, field))
                 return []
 
+
 def fetch_marketcap():
     url = "https://api.coinmarketcap.com/v1/global/"
 
@@ -153,14 +185,14 @@ def fetch_marketcap():
         "active_assets",
         "active_markets",
         "last_updated",
-        "timestamp"
+        "timestamp",
     ]
     int_fields = [
         "active_currencies",
         "active_assets",
         "active_markets",
         "last_updated",
-        "timestamp"
+        "timestamp",
     ]
     float_fields = [
         "total_market_cap_usd",
@@ -180,10 +212,10 @@ def fetch_marketcap():
             if TIMESTAMP[0]:
                 timestamp = TIMESTAMP[0]
             else:
-                timestamp = int(cmc_entry['last_updated'])/300*300
+                timestamp = int(cmc_entry["last_updated"]) / 300 * 300
                 TIMESTAMP[0] = timestamp
 
-            cmc_entry['timestamp'] = timestamp
+            cmc_entry["timestamp"] = timestamp
 
             for field in fields:
                 if field in int_fields:
@@ -201,18 +233,22 @@ def fetch_marketcap():
                 time.sleep(1)
             else:
                 # log the error only in all retries not succeeded
-                log("fetching marketcap: %s" %e)
+                log("fetching marketcap: %s" % e)
 
     return entry
+
 
 def fetch_currencies():
 
     def fetch_one_currency(currency):
-        
+
         retry = 3
         while retry > 0:
             try:
-                url = "https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=%s" % currency
+                url = (
+                    "https://api.coinmarketcap.com/v1/ticker/bitcoin/?convert=%s"
+                    % currency
+                )
 
                 t = requests.get(url)
                 cmc_entry = json.loads(t.text)[0]
@@ -220,16 +256,16 @@ def fetch_currencies():
                 if TIMESTAMP[0]:
                     timestamp = TIMESTAMP[0]
                 else:
-                    timestamp = int(cmc_entry['last_updated'])/300*300
+                    timestamp = int(cmc_entry["last_updated"]) / 300 * 300
                     TIMESTAMP[0] = timestamp
 
-                price_usd = float(cmc_entry['price_usd'])
-                price_currency = float(cmc_entry['price_%s' % currency.lower()])
+                price_usd = float(cmc_entry["price_usd"])
+                price_currency = float(cmc_entry["price_%s" % currency.lower()])
 
                 data = {
-                    'last_updated': int(cmc_entry['last_updated']),
-                    'timestamp': timestamp,
-                    currency: price_usd/price_currency,
+                    "last_updated": int(cmc_entry["last_updated"]),
+                    "timestamp": timestamp,
+                    currency: price_usd / price_currency,
                 }
                 break
             except Exception as e:
@@ -239,7 +275,7 @@ def fetch_currencies():
                 else:
                     # log the error only in all retries not succeeded
                     log("fetching currency: %s: %s" % (currency, e))
-        
+
         return data
 
     data = {}
@@ -251,6 +287,7 @@ def fetch_currencies():
 
     return data
 
+
 db = client.ratesx
 coins = db.coins
 marketcap = db.marketcap
@@ -260,7 +297,7 @@ currencies_data = fetch_currencies()
 
 coins_data = []
 for i in range(5):
-    data = fetch_coins(start=100*i)
+    data = fetch_coins(start=100 * i)
     coins_data.append(data)
     time.sleep(5)
 
@@ -276,5 +313,3 @@ if marketcap_data != []:
 for data in coins_data:
     if data != []:
         coins.insert_many(data)
-
-

@@ -1,5 +1,5 @@
 """
-  Coins codes and names.
+Coins codes and names.
 """
 
 COINS_NAMES = (
@@ -1010,33 +1010,30 @@ COINS_NAMES = (
     ("ARRR", "Pirate Chain"),
     ("WOW", "Wownero"),
     ("SUTER", "Suter Token"),
-
-# 2021-04-22 additions
+    # 2021-04-22 additions
     ("RVN",     "Ravencoin"),
     ("UBQ",     "Ubiq"),
     ("AVAX",    "Avalanche"),
     ("HIVE",    "Hive"),
     ("HBD",     "Hive Dollar"),
-
     ("BAN",     "Banano"),
-
-# 2021-05-27 additions
+    # 2021-05-27 additions
     ("FIL",     "Filecoin"),
     ("UNI",     "Uniswap"),
-
-# 2021-09-19 additions
+    # 2021-09-19 additions
     ("SOL",     "Solana"),
     ("NEAR",    "NEAR Protocol"),
     ("CFG",     "Centrifuge"),
     ("PAXG",    "PAX Gold"),
-
     ("MATIC",   "Polygon"),
     ("ALGO",    "Algorand"),
     ("BETH",    "Beacon ETH"),
+    ("XNO", "Nano"),
 )
-    # ("BTG", "Bitgem"),
+# ("BTG", "Bitgem"),
 
 COIN_NAMES_DICT = dict(COINS_NAMES)
+
 
 def coin_name(symbol):
     """

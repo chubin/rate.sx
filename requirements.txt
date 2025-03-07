@@ -1,7 +1,7 @@
 diagram
 colorclass~=1.1.2
 pymongo
-gevent~=1.2.2
+gevent
 flask
 pygments
 requests
@@ -14,3 +14,7 @@ termcolor
 PyYAML
 dateparser
 pylint
+black
+flynt
+MonkeyType
+Babel

@@ -102,7 +102,6 @@ Example of an entry:
 import logging
 import math
 import os
-import time
 
 from currencies_names import currency_name
 from coins_names import COINS_NAMES
@@ -152,10 +151,6 @@ def aggregate_coin(coin, time_start, interval):
     time_end = time_start + interval
     entries = list(_get_entries(coin, time_start, time_end))
 
-    if not entries:
-        _log(f"no entries for interval: {coin} {time_start} {time_end}")
-        return
-
     keys = [
         "rank",
         "price_usd",
@@ -165,10 +160,12 @@ def aggregate_coin(coin, time_start, interval):
         "total_supply",
     ]
 
+    timestamp = entries[0].get("timestamp")
+    time_end = entries[-1].get("timestamp")
     result = {
         "symbol": coin,
-        "timestamp": entries[0].get("timestamp"),
-        "time_end": entries[-1].get("timestamp"),
+        "timestamp": timestamp,
+        "time_end": time_end,
         "number_of_aggregated": len(entries),
     }
 
@@ -220,10 +217,6 @@ def aggregate_currencies(_, time_start, interval):
     entries = MONGO_READER.get_raw_data(
         None, time_start, time_end, collection_name="currencies"
     )
-
-    if not entries:
-        _log(f"no entries for interval: {time_start} {time_end}")
-        return
 
     result = {
         "timestamp": entries[0].get("timestamp"),
@@ -293,14 +286,8 @@ def get_aggregated_coin(
 
     # if interval is so small, we need to use the raw and not the aggregated data
     collection_name = None
-    # if chosen_interval:
-    #     collection_name = f"coins_{chosen_interval}"
-
-    # FIXME
-    # Temporary disabled intervals longer than 100 days.
-    # After aggregation is fixed, will intervals of any sizes will be available.
-    if time_end - time_start > 100 * 24 * 3600:
-        collection_name = "coins_24h"
+    if chosen_interval:
+        collection_name = f"coins_{chosen_interval}"
 
     entries = MONGO_READER.get_raw_data(
         coin, time_start, time_end, collection_name=collection_name
@@ -527,6 +514,8 @@ def aggregate_new_entries(coin):
         _log_error(f"timestamp is None for {coin}")
         return
 
+    import time
+
     for interval_name, interval_size in INTERVAL.items():
         collection_name = collection_prefix + interval_name
 
@@ -554,11 +543,12 @@ def aggregate_new_entries(coin):
         inserted_entries = 0
         timestamp = last_aggregated_timestamp
         while timestamp <= last_timestamp:
-            # try:
-            entry = aggregation_function(coin, timestamp, interval_size)
-            # except Exception as e_msg:
-            #     _log_error("ERROR: coin: %s: %s: %s" % (coin, time.strftime("%Y-%m-%d %H:%M", time.gmtime(timestamp)), e_msg))
-            #     entry = None
+            timestamp += interval_size
+            try:
+                entry = aggregation_function(coin, timestamp, interval_size)
+            except Exception as e:
+                print(time.strftime("%Y-%m-%d %H:%M", time.gmtime(timestamp))), e
+            continue
 
             # import json
             # print json.dumps(entry)
@@ -610,7 +600,7 @@ BLACKLISTED = """
     CREVA CRM CRX CSNO CTIC CTX CUBE CURE CVCOIN CXT
     CYP DAI DALC DAR DAXX DBTC DCY DDF DEM DFT
     DGC DGCS DGPT DIBC DICE DIX DLC DLISK DMB DNR
-    DOLLAR DOPE DOVU DP DRP DRS DRT DRXNE DSH
+    DOLLAR DOPE DOT DOVU DP DRP DRS DRT DRXNE DSH
     DSR DUO DYN EAC EAGLE EBCH EBET EBST EBT EBTC
     ECN ECO ECOB EDR EFL EFYT EGAS EGC EGO EL
     ELE ELIX ELLA ELS ELTCOIN EMD EMV ENT EOT EPY
@@ -667,11 +657,12 @@ def main():
     blacklisted = set(BLACKLISTED.split())
     coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
 
+    coins_to_aggregate = ["BTC"]
     for coin in coins_to_aggregate:
-        # try:
-        aggregate_new_entries(coin)
-    # except IndexError as e_msg:
-    #     _log_error("ERROR: coin: %s: %s" % (coin, e_msg))
+        try:
+            aggregate_new_entries(coin)
+        except IndexError as e_msg:
+            _log_error(f"ERROR: coin: {coin}: {e_msg}")
 
 
 if __name__ == "__main__":

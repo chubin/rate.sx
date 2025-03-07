@@ -6,6 +6,7 @@ Caches the results. Handles exceptions.
 
 from gevent.monkey import patch_all
 from gevent.subprocess import Popen, PIPE
+
 patch_all()
 
 import sys
@@ -19,8 +20,8 @@ import time
 import json
 import hashlib
 
-MYDIR = os.path.abspath(os.path.dirname(os.path.dirname('__file__')))
-sys.path.append("%s/lib/" % MYDIR)
+MYDIR = os.path.abspath(os.path.dirname(os.path.dirname("__file__")))
+sys.path.append(f"{MYDIR}/lib/")
 import currencies_names
 import calculator
 
@@ -34,105 +35,134 @@ from utils import remove_ansi, remove_trailing_spaces
 
 INTERNAL_TOPICS = [":help", ":currencies", ":coins"]
 
+
 def show_currencies():
-    return "\n".join(["%-6s %s" % (x, currencies_names.CURRENCY_NAME[x]) for x in currencies_names.SUPPORTED_CURRENCIES]) + "\n"
+    return (
+        "\n".join(
+            [
+                f"{x:6} {currencies_names.CURRENCY_NAME[x]}"
+                for x in currencies_names.SUPPORTED_CURRENCIES
+            ]
+        )
+        + "\n"
+    )
+
 
 def show_coins():
-    return "\n".join(["%-6s %s" % (x,y) for (x,y) in coins_names.COINS_NAMES]) + "\n"
+    return "\n".join([f"{x:6} {y}" for (x, y) in coins_names.COINS_NAMES]) + "\n"
+
 
 def get_internal(topic):
-    if topic == ':currencies':
+    if topic == ":currencies":
         return show_currencies()
 
-    if topic == ':coins':
+    if topic == ":coins":
         return show_coins()
 
     if topic in INTERNAL_TOPICS:
-        return open(os.path.join(MYDIR, "share", topic[1:]+".txt"), "r").read()
+        return open(os.path.join(MYDIR, "share", topic[1:] + ".txt"), "r").read()
 
     return ""
 
+
 def get_digest(data):
-    return hashlib.sha1(json.dumps(data, sort_keys=True)).hexdigest()
- 
+    return hashlib.sha1(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
+
+
 def get_cmd_output(hostname, topic, request_options):
 
-    digest = get_digest({'h':hostname, 't': topic, 'r': request_options})
+    digest = get_digest({"h": hostname, "t": topic, "r": request_options})
 
-    cache_file = '%s/cache/%s' % (MYDIR, digest)
+    cache_file = f"{MYDIR}/cache/{digest}"
     if os.path.exists(cache_file):
-        return open(cache_file).read().decode('utf-8')
-    #elif hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
+        return open(cache_file).read()
+    # elif hostname == 'rate.sx' and topic == ':firstpage' and os.path.exists(cache_file):
     #    return open(cache_file).read().decode('utf-8')
     else:
         currency = hostname.lower()
-        if currency.endswith('.rate.sx'):
+        if currency.endswith(".rate.sx"):
             currency = currency[:-8].upper()
 
-        if currency == 'COIN':
+        if currency == "COIN":
             return "Use YOUR COIN instead of COIN in the query: for example btg.rate.sx, xvg.rate.sx, eth.rate.sx and so on\nTry:\n curl btg.rate.sx\n curl xvg.rate.sx\n curl xrb.rate.sx\n"
 
         use_currency = currency
-        if currency not in currencies_names.SUPPORTED_CURRENCIES \
-            and currency not in coins_names.COIN_NAMES_DICT and currency != 'coin':
-            currency = 'USD'
+        if (
+            currency not in currencies_names.SUPPORTED_CURRENCIES
+            and currency not in coins_names.COIN_NAMES_DICT
+            and currency != "coin"
+        ):
+            currency = "USD"
 
-        if topic != ':firstpage':
+        if topic != ":firstpage":
             try:
                 answer = calculator.calculate(topic.upper(), currency)
                 if answer:
-                    answer = 'text %s' % answer
+                    answer = f"text {answer}"
             except ValueError as e:
-                return "ERROR: %s\n" % e
+                return f"ERROR: {e}\n"
 
             if answer is None:
                 try:
-                    answer = draw.view(topic, use_currency=use_currency)
+                    answer = draw.view(topic, use_currency=currency)
                 except RuntimeError as e:
-                    return "ERROR: %s\n" % e
+                    return f"ERROR: {e}\n"
 
             if answer is not None:
-                if request_options.get('no-terminal'):
+                if request_options.get("no-terminal"):
                     answer = remove_trailing_spaces(remove_ansi(answer))
-                open(cache_file, 'w').write(str(answer)+"\n")
-                return "%s\n" % answer
+                open(cache_file, "w").write(str(answer) + "\n")
+                return f"{answer}\n"
             else:
-                return "ERROR: Can't parse your query: %s\n" % topic
+                return f"ERROR: Can't parse your query: {topic}\n"
 
-        cmd = ["%s/ve/bin/python" % MYDIR, "%s/bin/show_data.py" % MYDIR, currency, topic]
+        cmd = [
+            f"{MYDIR}/ve/bin/python",
+            f"{MYDIR}/bin/show_data.py",
+            currency,
+            topic,
+        ]
 
     config = request_options
-    config['currency'] = currency
+    config["currency"] = currency
     answer = view.show(config)
 
-    if config.get('no-terminal'):
+    if config.get("no-terminal"):
         answer = remove_trailing_spaces(remove_ansi(answer))
 
-    open(cache_file, 'w').write(answer)
-    #p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    #answer = p.communicate()[0]
-    return answer.decode('utf-8')
+    open(cache_file, "w").write(answer)
+    # p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    # answer = p.communicate()[0]
+    return answer
+
 
 def rewrite_aliases(word):
-    if word == ':bash.completion':
-        return ':bash_completion'
+    if word == ":bash.completion":
+        return ":bash_completion"
     return word
 
+
 def html_wrapper(data):
-    p = Popen([ "bash", ANSI2HTML, "--palette=xterm", "--bg=dark" ],  stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    data = data.encode('utf-8')
+    p = Popen(
+        ["bash", ANSI2HTML, "--palette=xterm", "--bg=dark"],
+        stdin=PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
+    )
+    data = data.encode("utf-8")
     stdout, stderr = p.communicate(data)
     if p.returncode != 0:
-        error(stdout + stderr)
-    return stdout.decode('utf-8')
+        error((stdout + stderr).decode("utf-8"))
+    return stdout.decode("utf-8")
+
 
 def cmd_wrapper(query, hostname=None, request_options=None, html=False):
 
-    # 
+    #
     # at the moment, we just remove trailing slashes
     # so queries python/ and python are equal
     #
-    query = query.rstrip('/')
+    query = query.rstrip("/")
 
     query = rewrite_aliases(query)
 
@@ -141,7 +171,7 @@ def cmd_wrapper(query, hostname=None, request_options=None, html=False):
     else:
         result = get_cmd_output(hostname, query, request_options)
 
-    if result and result.startswith('text '):
+    if result and result.startswith("text "):
         result = result[5:]
         html = False
 
@@ -151,8 +181,12 @@ def cmd_wrapper(query, hostname=None, request_options=None, html=False):
         result = html_wrapper(result)
         title = "<title>rate.sx</title>"
         result = re.sub("<head>", "<head>" + title, result)
-        if not request_options.get('quiet') or not request_options.get('no-follow-line'):
-            result = result.replace('</body>', TWITTER_BUTTON + GITHUB_BUTTON + GITHUB_BUTTON_FOOTER + '</body>')
+        if not request_options.get("quiet") or not request_options.get(
+            "no-follow-line"
+        ):
+            result = result.replace(
+                "</body>",
+                TWITTER_BUTTON + GITHUB_BUTTON + GITHUB_BUTTON_FOOTER + "</body>",
+            )
 
     return result
-
