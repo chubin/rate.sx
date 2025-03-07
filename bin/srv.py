@@ -2,7 +2,8 @@
 # vim: set encoding=utf-8
 
 import gevent
-from gevent.wsgi import WSGIServer
+# from gevent.wsgi import WSGIServer
+from gevent.pywsgi import WSGIServer
 from gevent.queue import Queue
 from gevent.monkey import patch_all
 from gevent.subprocess import Popen, PIPE, STDOUT
