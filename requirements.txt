@@ -16,3 +16,4 @@ dateparser
 pylint
 black
 flynt
+MonkeyType
