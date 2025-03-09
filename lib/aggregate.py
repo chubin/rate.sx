@@ -127,6 +127,7 @@ logging.basicConfig(
 
 
 def _log(message):
+    print(message)
     if DEBUG_LEVEL > 0:
         logging.info(message)
 
@@ -666,6 +667,8 @@ def main():
     """
     blacklisted = set(BLACKLISTED.split())
     coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
+
+    coins_to_aggregate = [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
 
     for coin in coins_to_aggregate:
         # try:
