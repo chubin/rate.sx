@@ -392,9 +392,8 @@ class MongoWriter(object):
 
         if (
             collection_name
-            and collection_name not in self.client.ratesx.collection_names()
+            and collection_name not in self.client.ratesx.list_collection_names()
         ):
-
             if collection_name.startswith("coins_"):
                 coins.create_index([("symbol", ASCENDING)], unique=False)
                 coins.create_index([("timestamp", ASCENDING)], unique=False)
