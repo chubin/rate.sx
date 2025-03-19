@@ -127,6 +127,7 @@ logging.basicConfig(
 
 
 def _log(message):
+    print(message)
     if DEBUG_LEVEL > 0:
         logging.info(message)
 
@@ -440,23 +441,29 @@ def get_aggregated_pair(
             coin2, time_start, time_end, collection_name=collection_name
         )
 
+    prev_meta = {}
     meta = {}
     ticks = []
     sum_ = 0
 
     if collection_name is None:
         # not aggregated data
-        meta = {
-            "symbol": entries1[0]["symbol"],
-            "begin": entries1[0][key] / entries2[0][key],
-            "end": entries1[-1][key] / entries2[-1][key],
-            "time_begin": entries1[0]["timestamp"],
-            "time_end": entries1[-1]["timestamp"],
-            "min": entries1[0][key] / entries2[0][key],
-            "max": entries1[0][key] / entries2[0][key],
-            "time_min": entries1[0]["timestamp"],
-            "time_max": entries1[0]["timestamp"],
-        }
+        prev_meta = meta.copy()
+
+        try:
+            meta = {
+                "symbol": entries1[0]["symbol"],
+                "begin": entries1[0][key] / entries2[0][key],
+                "end": entries1[-1][key] / entries2[-1][key],
+                "time_begin": entries1[0]["timestamp"],
+                "time_end": entries1[-1]["timestamp"],
+                "min": entries1[0][key] / entries2[0][key],
+                "max": entries1[0][key] / entries2[0][key],
+                "time_min": entries1[0]["timestamp"],
+                "time_max": entries1[0]["timestamp"],
+            }
+        except IndexError:
+            meta = prev_meta
 
         for entry1, entry2 in zip(entries1, entries2):
             this_value = entry1[key] / entry2[key]
@@ -476,17 +483,22 @@ def get_aggregated_pair(
         # this parameter should be taken to the ticks
         take_this = "avg"
 
-        meta = {
-            "symbol": entries1[0]["symbol"],
-            "begin": entries1[0][key]["begin"] / entries2[0][key]["begin"],
-            "end": entries1[-1][key]["end"] / entries2[-1][key]["end"],
-            "time_begin": entries1[0]["timestamp"],
-            "time_end": entries1[-1]["time_end"],
-            "min": entries1[0][key]["min"] / entries2[0][key]["max"],
-            "max": entries1[0][key]["max"] / entries2[0][key]["min"],
-            "time_min": entries1[0][key]["time_min"],
-            "time_max": entries1[0][key]["time_max"],
-        }
+        prev_meta = meta.copy()
+
+        try:
+            meta = {
+                "symbol": entries1[0]["symbol"],
+                "begin": entries1[0][key]["begin"] / entries2[0][key]["begin"],
+                "end": entries1[-1][key]["end"] / entries2[-1][key]["end"],
+                "time_begin": entries1[0]["timestamp"],
+                "time_end": entries1[-1]["time_end"],
+                "min": entries1[0][key]["min"] / entries2[0][key]["max"],
+                "max": entries1[0][key]["max"] / entries2[0][key]["min"],
+                "time_min": entries1[0][key]["time_min"],
+                "time_max": entries1[0][key]["time_max"],
+            }
+        except IndexError:
+            meta = prev_meta
 
         for entry1, entry2 in zip(entries1, entries2):
             this_value = entry1[key][take_this] / entry2[key][take_this]
@@ -501,7 +513,10 @@ def get_aggregated_pair(
                 meta["min"] = this_value
                 meta["time_min"] = entry1[key]["time_min"]
 
-    meta["avg"] = sum_ / len(ticks)
+    if len(ticks) > 0:
+        meta["avg"] = sum_ / len(ticks)
+    else:
+        meta["avg"] = 0
 
     return {
         "ticks": ticks,
@@ -666,6 +681,8 @@ def main():
     """
     blacklisted = set(BLACKLISTED.split())
     coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
+
+    coins_to_aggregate = [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
 
     for coin in coins_to_aggregate:
         # try:
