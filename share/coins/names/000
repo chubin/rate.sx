@@ -63,7 +63,6 @@ WTC      Walton
 GBYTE    Byteball Bytes
 DENT     Dent
 FUN      FunFair
-BTM      Bytom
 AION     Aion
 FCT      Factom
 XP       Experience Points
@@ -89,7 +88,6 @@ NXS      Nexus
 NAS      Nebulas
 GNO      Gnosis
 BNT      Bancor
-ICN      Iconomi
 PAY      TenX
 XDN      DigitalNote
 ELF      aelf
@@ -100,7 +98,6 @@ BTX      Bitcore
 LINK     ChainLink
 BTCD     BitcoinDark
 NEBL     Neblio
-BTCD     BitcoinDark
 XPA      XPlay
 RDN      Raiden Network Token
 PAC      PACcoin
@@ -129,7 +126,6 @@ R        Revain
 LEND     ETHLend
 SNGLS    SingularDTV
 DBC      DeepBrain Chain
-UBQ      Ubiq
 VIBE     VIBE
 SRN      SIRIN LABS Token
 ANT      Aragon
@@ -153,7 +149,6 @@ WABI     WaBi
 LBC      LBRY Credits
 ATM      ATMChain
 UNITY    SuperNET
-CMT      CyberMiles
 DATA     Streamr DATAcoin
 ETP      Metaverse ETP
 TRIG     Triggers
@@ -255,7 +250,6 @@ BOT      Bodhi
 BITCNY   bitCNY
 BLK      BlackCoin
 ONION    DeepOnion
-NET      Nimiq
 TIX      Blocktix
 DIME     Dimecoin
 FAIR     FairCoin
@@ -340,7 +334,7 @@ CLAM     Clams
 LINDA    Linda
 FLDC     FoldingCoin
 GCR      Global Currency Reserve
-CAT      BlockCAT
+CAT      Simon's CAT
 ICOS     ICOS
 MINT     Mintcoin
 LOC      LockChain
@@ -410,12 +404,10 @@ WISH     MyWish
 SUMO     Sumokoin
 SPHR     Sphere
 MAG      Magnet
-BTM      Bitmark
 SPRTS    Sprouts
 DICE     Etheroll
 PIX      Lampix
 PLU      Pluton
-PRO      ProChain
 PTC      Pesetacoin
 ECOB     Ecobit
 CURE     Curecoin
@@ -537,7 +529,6 @@ VIDZ     PureVidz
 EGC      EverGreenCoin
 TRC      Terracoin
 ANC      Anoncoin
-WDC      WorldCoin
 QRK      Quark
 PUT      PutinCoin
 REC      Regalcoin
@@ -547,7 +538,6 @@ PKB      ParkByte
 APX      APX
 STU      bitJob
 LINX     Linx
-SMART    SmartBillions
 QVT      Qvolta
 HAL      Halcyon
 FLIK     FLiK
@@ -607,7 +597,6 @@ FJC      FujiCoin
 BTA      Bata
 LGD      Legends Room
 GRE      Greencoin
-NET      NetCoin
 V        Version
 CRM      Cream
 JET      Jetcoin
@@ -649,7 +638,6 @@ TROLL    Trollcoin
 FST      Fastcoin
 PIPL     PiplCoin
 XPD      PetroDollar
-ACC      Accelerator Network
 TRCT     Tracto
 EBET     EthBet
 HTC      HitCoin
@@ -701,7 +689,6 @@ HODL     HOdlcoin
 PIGGY    Piggycoin
 KOBO     Kobocoin
 TTC      TittieCoin
-ACC      AdCoin
 XBL      Billionaire Token
 BITS     Bitstar
 CCO      Ccore
@@ -790,7 +777,6 @@ CHAN     ChanCoin
 HNC      Helleniccoin
 CCN      CannaCoin
 BTWTY    Bit20
-ICN      iCoin
 DDF      DigitalDevelopersFund
 DUO      ParallelCoin
 EOT      EOT Token
@@ -850,7 +836,6 @@ REE      ReeCoin
 GP       GoldPieces
 611      SixEleven
 MOTO     Motocoin
-CAT      Catcoin
 MAO      Mao Zedong
 $$$      Money
 ICE      iDice
@@ -923,7 +908,6 @@ ANTI     AntiBitcoin
 DBTC     Debitcoin
 TOR      Torcoin
 VPRC     VapersCoin
-KNC      KingN Coin
 DLISK    DAPPSTER
 WOMEN    WomenCoin
 XBTC21   Bitcoin 21
