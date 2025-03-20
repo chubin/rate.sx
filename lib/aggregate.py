@@ -294,14 +294,14 @@ def get_aggregated_coin(
 
     # if interval is so small, we need to use the raw and not the aggregated data
     collection_name = None
-    # if chosen_interval:
-    #     collection_name = f"coins_{chosen_interval}"
+    if chosen_interval:
+        collection_name = f"coins_{chosen_interval}"
 
     # FIXME
     # Temporary disabled intervals longer than 100 days.
     # After aggregation is fixed, will intervals of any sizes will be available.
-    if time_end - time_start > 100 * 24 * 3600:
-        collection_name = "coins_24h"
+    # if time_end - time_start > 100 * 24 * 3600:
+    #     collection_name = "coins_24h"
 
     entries = MONGO_READER.get_raw_data(
         coin, time_start, time_end, collection_name=collection_name
@@ -661,7 +661,7 @@ BLACKLISTED = """
     SPRTS SPT SRC SSS STA STAK STARS STN STRC STU
     STV SUMO SUPER SWIFT SWING SXC SYNX TAG TAJ TALK
     TCC TEK TES TFL TGC TGT TIPS TIT TKR TKS
-    TOA TOKEN TOR TRCT TRDT TRI TRIG TRK TROLL TRUMP
+    TOA TOKEN TOR TRCT TRDT TRI TRIG TRK TROLL
     TRUST TSE TSTR TTC TX TZC UET UFO UFR UIS
     ULA UNB UNIC UNIFY UNITS UNITY UNY URC URO USDE
     USNBT UTC V VAL VEC VIDZ VISIO VIVO VLT VLTC
