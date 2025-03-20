@@ -4,8 +4,7 @@ TWITTER_BUTTON = """
 """
 
 GITHUB_BUTTON = """
-<!-- Place this tag where you want the button to render. -->
-<a aria-label="Star chubin/wttr.in on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/chubin/cheat.sh#stargazers_count" data-count-href="/chubin/cheat.sh/stargazers" data-icon="octicon-star" href="https://github.com/chubin/rate.sx" class="github-button">rate.sx</a>
+<a aria-label="Star chubin/rate.sx on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-api="/repos/chubin/rate.sx#stargazers_count" data-count-href="/chubin/rate.sx/stargazers" data-show-count="true" data-icon="octicon-star" href="https://github.com/chubin/rate.sx" class="github-button">rate.sx</a>
 """
 
 GITHUB_BUTTON_FOOTER = """
