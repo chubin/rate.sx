@@ -166,7 +166,10 @@ class Diagram(object):  # pylint: disable=too-many-instance-attributes
             if self.interval < 7 * 24 * 3600:
                 date_fmt = "%a %d"
             else:
-                date_fmt = "%d %b"
+                if self.interval > 182 * 24 * 3600:
+                    date_fmt = "%d %b %Y"
+                else:
+                    date_fmt = "%d %b"
 
             fmt = ""
             if self.interval >= 24 * 3600 or show_date:
