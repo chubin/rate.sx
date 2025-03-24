@@ -127,7 +127,6 @@ logging.basicConfig(
 
 
 def _log(message):
-    print(message)
     if DEBUG_LEVEL > 0:
         logging.info(message)
 
@@ -679,6 +678,14 @@ def main():
     """
     Aggregator of existing entries
     """
+
+    LOGFILE = f"{MYDIR}/log/aggregate-main.log"
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        filename=LOGFILE,
+        level=logging.INFO,
+    )
+
     blacklisted = set(BLACKLISTED.split())
     coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
 
