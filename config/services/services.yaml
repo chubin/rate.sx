@@ -1,0 +1,8 @@
+services:
+  - name: "main server"
+    command: "while true; do ve/bin/python bin/srv.py; sleep 5; done"
+    workdir: "/home/igor/rate.sx"
+
+  - name: "update service"
+    command: "while true; do bash update.sh; sleep 5; done"
+    workdir: "/home/igor/rate.sx-scripts"

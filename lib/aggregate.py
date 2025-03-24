@@ -102,7 +102,6 @@ Example of an entry:
 import logging
 import math
 import os
-import time
 
 from currencies_names import currency_name
 from coins_names import COINS_NAMES
@@ -127,7 +126,6 @@ logging.basicConfig(
 
 
 def _log(message):
-    print(message)
     if DEBUG_LEVEL > 0:
         logging.info(message)
 
@@ -679,6 +677,21 @@ def main():
     """
     Aggregator of existing entries
     """
+
+    global DEBUG_LEVEL
+    DEBUG_LEVEL = 1
+    LOGFILE = f"{MYDIR}/log/aggregate-main.log"
+
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+        handler.close()
+
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        filename=LOGFILE,
+        level=logging.INFO,
+    )
+
     blacklisted = set(BLACKLISTED.split())
     coins_to_aggregate = [None] + [x[0] for x in COINS_NAMES if x[0] not in blacklisted]
 
