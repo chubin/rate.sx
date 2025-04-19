@@ -61,13 +61,13 @@ sys.path.append("%s/lib/" % MYDIR)
 
 from pymongo import MongoClient
 
-client = MongoClient()
+mongo_host = os.environ.get("MONGO_HOST", "localhost")
+client = MongoClient(host=mongo_host)
 
-LOGFILE = "%s/log/fetch.log" % MYDIR
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
-    filename=LOGFILE,
-    level=logging.INFO,
+    stream=sys.stdout,
+    level=logging.DEBUG,
 )
 
 CURRENCIES = [
@@ -113,8 +113,13 @@ def log(s):
 
 def fetch_coins(token):
 
-    # url = "https://api.coinmarketcap.com/v1/ticker/"
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=600&convert=USD"
+    headers = {"X-CMC_PRO_API_KEY": token}
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        log(f"CoinMarketCap API error: HTTP {response.status_code} {response.text}")
+        raise SystemExit(f"Aborting: CoinMarketCap API returned {response.status_code}")
+    cmc_data = response.json()
 
     fields = [
         "symbol",
@@ -197,10 +202,13 @@ def fetch_coins(token):
 
 
 def fetch_marketcap(token):
-    # url = "https://api.coinmarketcap.com/v1/global/"
-    url = (
-        "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest?convert=USD"
-    )
+    url = "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest?convert=USD"
+    headers = {"X-CMC_PRO_API_KEY": token}
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        log(f"CoinMarketCap API error: HTTP {response.status_code} {response.text}")
+        raise SystemExit(f"Aborting: CoinMarketCap API returned {response.status_code}")
+    cmc_data = response.json()
 
     fields = [
         "total_market_cap_usd",
@@ -329,7 +337,14 @@ def fetch_currencies(token):
         url = "http://data.fixer.io/api/latest?access_key=%s" % token
 
         response = requests.get(url)
-        currency_data = json.loads(response.text)
+        if response.status_code != 200:
+            log(f"Fixer API error: HTTP {response.status_code} {response.text}")
+            raise SystemExit(f"Aborting: Fixer API returned {response.status_code}")
+        currency_data = response.json()
+        # Log the full response if 'rates' key is missing
+        if "rates" not in currency_data:
+            log(f"Fixer API response missing 'rates' key: {currency_data}")
+            raise SystemExit("Aborting: Fixer API response missing 'rates' key")
         # currency_data = json.loads(open("currencies.data", "r").read())
         usd_rate = currency_data["rates"]["USD"]
 
