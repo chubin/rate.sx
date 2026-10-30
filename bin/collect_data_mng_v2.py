@@ -156,7 +156,30 @@ def fetch_coins(token):
         cmc_data = json.loads(response.text.encode("utf-8"))
         # cmc_data = json.loads(open("saved.data", "r").read())
         data = []
-        for cmc_entry in cmc_data["data"]:
+        seen_symbols = set()
+        # several CMC tokens can share one ticker; keep only the best ranked one,
+        # otherwise their prices get mixed under the same symbol (issue #94)
+        for cmc_entry in sorted(cmc_data["data"], key=lambda x: x["cmc_rank"]):
+            if cmc_entry["symbol"] in seen_symbols:
+                log(
+                    "dropping duplicate symbol %s: %s (cmc id %s, rank %s)"
+                    % (
+                        cmc_entry["symbol"],
+                        cmc_entry["name"],
+                        cmc_entry["id"],
+                        cmc_entry["cmc_rank"],
+                    )
+                )
+                continue
+            seen_symbols.add(cmc_entry["symbol"])
+
+            if not cmc_entry["quote"]["USD"]["price"]:
+                log(
+                    "skipping %s (cmc id %s): no USD price"
+                    % (cmc_entry["symbol"], cmc_entry["id"])
+                )
+                continue
+
             entry = {}
 
             # adding legacy names to cmc_entry
