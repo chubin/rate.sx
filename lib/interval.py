@@ -239,6 +239,8 @@ def parse_interval(
             delta = relativedelta(days=1)
         elif parsed.minute == 0:
             delta = relativedelta(hours=1)
+        else:
+            delta = relativedelta(minutes=1)
 
         return _epoch(parsed), _epoch(parsed + delta)
 

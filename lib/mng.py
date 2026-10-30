@@ -51,11 +51,16 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
         self._spark_price_currency_ticks = []
 
     def currency_factor(
-        self, timestamp: Optional[Union[int, float]] = None, currency: None = None
+        self,
+        timestamp: Optional[Union[int, float]] = None,
+        currency: None = None,
+        max_age: Optional[int] = None,
     ) -> int:
         """
         Factor that is used to convert value in <self.currency> in USD
-        for specified <timestamp>
+        for specified <timestamp>.
+        If <max_age> is specified, data older than <timestamp> - <max_age>
+        is not used.
         """
 
         if currency is None:
@@ -70,12 +75,15 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
             return 1
 
         # we use cache only if timestamp is specified
-        if timestamp and (currency, timestamp) in self._currency_factor_cache:
-            return self._currency_factor_cache[(currency, timestamp)]
+        cache_key = (currency, timestamp, max_age)
+        if timestamp and cache_key in self._currency_factor_cache:
+            return self._currency_factor_cache[cache_key]
 
         query = {}
         if timestamp:
             query["timestamp"] = {"$lt": timestamp + 1}
+            if max_age:
+                query["timestamp"]["$gt"] = timestamp - max_age
 
         if is_currency_coin:
             query.update({"symbol": currency})
@@ -100,7 +108,7 @@ class MongoReader(object):  # pylint: disable=too-many-instance-attributes
 
         # we use cache only if timestamp is specified
         if timestamp:
-            self._currency_factor_cache[(currency, timestamp)] = 1 / price_symbol
+            self._currency_factor_cache[cache_key] = 1 / price_symbol
 
         return 1 / price_symbol
 

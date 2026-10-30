@@ -29,8 +29,10 @@ from mng import MongoReader
 mongo_reader = MongoReader()
 
 
-def get_rate_to_usd(currency, timestamp=None):
-    return 1 / mongo_reader.currency_factor(timestamp=timestamp, currency=currency)
+def get_rate_to_usd(currency, timestamp=None, max_age=None):
+    return 1 / mongo_reader.currency_factor(
+        timestamp=timestamp, currency=currency, max_age=max_age
+    )
 
 
 def _main():

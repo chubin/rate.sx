@@ -46,6 +46,16 @@ You can also combine different currencies and cryptocurrencies in the same query
   $ curl rate.sx/1BTC-10ETH               # compare what is more: 1 BTC or 10 ETH
 ```
 
+To convert using historical exchange rates, add the date (or any other interval, see
+the *Interval specification* section below) after the `@` sign.
+The closing rates of the interval are used (for a day, the last rates of that day, UTC):
+
+```
+  $ curl rate.sx/0.1BTC@2021-03-01        # 0.1 BTC in USD at the end of March 1, 2021
+  $ curl eur.rate.sx/1BTC@2021-03-01T12:30 # 1 BTC in EUR at 12:30 UTC on March 1, 2021
+  $ curl rate.sx/1BTC-30ETH@2021-03-01    # compare 1 BTC and 30 ETH at the end of March 1, 2021
+```
+
 To show how cryptocurrency exchange rate was changing in time, 
 specify name of the cryptocurrency in the URL.
 
