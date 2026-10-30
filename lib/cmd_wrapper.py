@@ -96,7 +96,7 @@ def get_cmd_output(hostname, topic, request_options):
 
         if topic != ":firstpage":
             try:
-                answer = calculator.calculate(topic.upper(), currency)
+                answer = calculator.calculate(topic, currency)
                 if answer:
                     answer = f"text {answer}"
             except ValueError as e:

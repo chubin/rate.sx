@@ -9,6 +9,7 @@ Or in the cryptocurrency calculator mode:
     $ curl eur.rate.sx/1BTC+1BCH+1BTG       # to convert sum of the bitcoins into Euro
     $ curl rub.rate.sx/100ETH               # to convert 100 ETH into Russian ruble
     $ curl rate.sx/1BTC-10ETH               # to compare what is more: 1 BTC or 10 ETH
+    $ curl rate.sx/0.1BTC@2021-03-01        # to convert 0.1 BTC into USD using the rates at the end of 2021-03-01
 
 Options:
 
